@@ -11,7 +11,11 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.UUID;
+
+import edu.teco.smartaqnet.buffering.ObjectQueue;
+import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
 
 import static android.bluetooth.BluetoothAdapter.STATE_CONNECTED;
 import static android.bluetooth.BluetoothAdapter.STATE_DISCONNECTED;
@@ -29,11 +33,15 @@ public class BLEConnectedDeviceController {
             UUID.fromString("7a812f99-06fa-4d89-819d-98e9aafbd4ef");
     private final static UUID DESCRIPTOR_UUID =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    private ObjectQueue<String> smartAQDataQueue;
+
 
 
     public BLEConnectedDeviceController(Context context, BLEConnectionButton bleConnectionButton){
         bleConButton = bleConnectionButton;
         mainActivity = (Activity) context;
+        //Initialize persistant FIFO-Buffer for notifications from BLE
+        smartAQDataQueue = (new SmartAQDataQueue(mainActivity)).getSmartAQDataQueue();
     }
 
     // Stops scanning after 30 seconds.
@@ -55,7 +63,25 @@ public class BLEConnectedDeviceController {
             mainActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     String res = characteristic.getStringValue(0);
+                    try {
+                        smartAQDataQueue.add(res);
+                    } catch (IOException e) {
+                        //TODO IOException adding data to smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
+                    try {
+                        res = smartAQDataQueue.peek();
+                    } catch (IOException e){
+                        //TODO IOException reading data from smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
                     ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(res);
+                    try {
+                        smartAQDataQueue.remove();
+                    } catch (IOException e){
+                        //TODO IOException removing data to smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
                 }
             });
         }

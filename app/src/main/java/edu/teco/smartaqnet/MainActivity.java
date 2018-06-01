@@ -6,6 +6,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+
+import edu.teco.smartaqnet.buffering.ObjectQueue;
+import edu.teco.smartaqnet.buffering.QueueFile;
+import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
+
 import static edu.teco.smartaqnet.SetMainView.*;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,9 +32,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /*Set first view of app and activate Button that controls BLE Connection*/
         controlBLEButton = findViewById(R.id.controlBLEButton);
         setView(views.startScan, this, controlBLEButton);
-
+        //Activate Bluetooth
         bleHandler = new BLEDevicesScanner(this, controlBLEButton);
         controlBLEButton.setClickListener(bleHandler);
     }
