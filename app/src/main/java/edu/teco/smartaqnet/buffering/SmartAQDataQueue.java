@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 public class SmartAQDataQueue {
@@ -15,7 +16,8 @@ public class SmartAQDataQueue {
 
     public SmartAQDataQueue(Activity mainActivity){
         File outputDir = mainActivity.getCacheDir();
-        String path = outputDir.toString() + "data.tmp";
+        String path = outputDir.toString() + "/data1.tmp";
+        //File not yet created, only path is registered
         File outputFile = new File (path);
         try{
             QueueFile queueFile = new QueueFile.Builder(outputFile).build();
@@ -35,7 +37,13 @@ public class SmartAQDataQueue {
 
                 @Override
                 public void toStream(Object obj, OutputStream bytes) {
-                    bytes  = new ByteArrayOutputStream();
+                    try{
+                        ObjectOutputStream os = new ObjectOutputStream(bytes);
+                        os.writeObject(obj);
+                    } catch (Exception e) {
+                        //TODO: Handle exception
+                        e.printStackTrace();
+                    }
                 }
             };
             smartAQDataqueue = ObjectQueue.create(queueFile, converter);

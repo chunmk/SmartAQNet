@@ -44,20 +44,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //TODO: Control-Button Ablauf
-    //TODO: Bluetooth-Verbindung aufbauen
-    //TODO: Bluetooth-Services identifizieren max. 4
-    //TODO: RSSI messen
-    //TODO: Datenübertragung aktivieren
-    //TODO: Datenübertragung puffern
-    //TODO: Buttons für Services aktivieren
-    //TODO: Services Dummy Page
+    //TODO: Verbindungsabbruch BLE checken
+    //TODO: Settingspage
+    //TODO: App als Hintergrundapp laufen lassen
     //TODO: GPS-Verbindung
     //TODO: GPS-Track
-    //TODO: Settingspage
     //TODO: WLAN konnektieren, Verbindungsabbruch verarbeiten
     //TODO: Mobilen Dienst konnektieren, Verbindungsabbruch verarbeiten
-    //TODO: Datenaufereitung für senden
+    //TODO: Datenaufbereitung für senden
     //TODO: MQTT
 
     @Override

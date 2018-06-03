@@ -63,22 +63,23 @@ public class BLEConnectedDeviceController {
             mainActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     String res = characteristic.getStringValue(0);
+                    String result ="";
                     try {
                         smartAQDataQueue.add(res);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         //TODO IOException adding data to smartAQDataQueue behandeln
                         e.printStackTrace();
                     }
                     try {
-                        res = smartAQDataQueue.peek();
-                    } catch (IOException e){
+                        result = smartAQDataQueue.peek();
+                    } catch (Exception e){
                         //TODO IOException reading data from smartAQDataQueue behandeln
                         e.printStackTrace();
                     }
-                    ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(res);
+                    ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(result);
                     try {
                         smartAQDataQueue.remove();
-                    } catch (IOException e){
+                    } catch (Exception e){
                         //TODO IOException removing data to smartAQDataQueue behandeln
                         e.printStackTrace();
                     }

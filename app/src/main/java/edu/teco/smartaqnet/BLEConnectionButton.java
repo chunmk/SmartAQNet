@@ -33,7 +33,6 @@ public class BLEConnectionButton extends android.support.v7.widget.AppCompatButt
                 switch (stateTriggered){
                     case SCAN:
                         //Scan Button pressed
-                        //TODO: Set Visibilities
                         bleHandler.startDetectingDevices();
                         break;
                     case STOP:
