@@ -111,7 +111,7 @@ public class BLEConnectedDeviceController {
                     mainActivity.runOnUiThread(new Runnable() {
                         public void run() {
                             ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText("we encounterned an unknown state, uh oh\n");
-                            ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setVisibility(View.VISIBLE);
+                            (mainActivity.findViewById(R.id.deviceValueText)).setVisibility(View.VISIBLE);
                         }
                     });
                     break;

@@ -15,9 +15,9 @@ public class SmartAQDataQueue {
 
     public SmartAQDataQueue(Activity mainActivity){
         File outputDir = mainActivity.getCacheDir();
-        File outputFile;
-            try{
-            outputFile = File.createTempFile("prefix", "extension", outputDir);
+        String path = outputDir.toString() + "data.tmp";
+        File outputFile = new File (path);
+        try{
             QueueFile queueFile = new QueueFile.Builder(outputFile).build();
             ObjectQueue.Converter converter = new ObjectQueue.Converter() {
 
@@ -41,6 +41,7 @@ public class SmartAQDataQueue {
             smartAQDataqueue = ObjectQueue.create(queueFile, converter);
         } catch (IOException e) {
             //TODO: Fehlerbehandlung FIFO Datei nicht erstellbar
+                e.printStackTrace();
         }
     }
 
