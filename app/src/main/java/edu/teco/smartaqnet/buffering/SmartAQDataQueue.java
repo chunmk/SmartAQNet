@@ -14,9 +14,8 @@ public class SmartAQDataQueue {
 
     private ObjectQueue<String> smartAQDataqueue;
 
-    public SmartAQDataQueue(Activity mainActivity){
-        File outputDir = mainActivity.getCacheDir();
-        String path = outputDir.toString() + "/data1.tmp";
+    public SmartAQDataQueue(String outputDir){
+        String path = outputDir + "/data.tmp";
         //File not yet created, only path is registered
         File outputFile = new File (path);
         try{

@@ -4,21 +4,21 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class BLEConnectionButton extends android.support.v7.widget.AppCompatButton{
+public class BTStateButton extends android.support.v7.widget.AppCompatButton{
     public enum States {SCAN, STOP, DISCONNECT}
     private States stateTriggered;
 
-    public BLEConnectionButton(Context context){
+    public BTStateButton(Context context){
         super(context);
         stateTriggered = States.SCAN;
     }
 
-    public BLEConnectionButton(Context context, AttributeSet attributes){
+    public BTStateButton(Context context, AttributeSet attributes){
         super(context,attributes);
         stateTriggered = States.SCAN;
     }
 
-    public BLEConnectionButton(Context context, AttributeSet attributes, int defStyleAttr){
+    public BTStateButton(Context context, AttributeSet attributes, int defStyleAttr){
         super(context, attributes,defStyleAttr);
         stateTriggered = States.SCAN;
     }
@@ -27,7 +27,7 @@ public class BLEConnectionButton extends android.support.v7.widget.AppCompatButt
         this.stateTriggered = stateTriggered;
     }
 
-    public void setClickListener(final BLEDevicesScanner bleHandler) {
+    public void setClickListener(final BTDetect bleHandler) {
         setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 switch (stateTriggered){

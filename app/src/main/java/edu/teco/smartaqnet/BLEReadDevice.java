@@ -16,7 +16,6 @@
 
 package edu.teco.smartaqnet;
 
-import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -44,8 +43,8 @@ import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+public class BLEReadDevice extends Service {
+    private final static String TAG = BLEReadDevice.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -57,10 +56,6 @@ public class BluetoothLeService extends Service {
     // Stops scanning after 2 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 2000;
-
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
 
     private final static UUID SMARTAQ_SERVICE_UUID =
             UUID.fromString("6e57fcf9-8064-4995-a3a8-e5ca44552192");
@@ -133,7 +128,7 @@ public class BluetoothLeService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic.getStringValue(0));
             }
         }
 
@@ -142,7 +137,8 @@ public class BluetoothLeService extends Service {
                                             BluetoothGattCharacteristic characteristic) {
             try {
                 smartAQDataQueue.add(characteristic.getStringValue(0));
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                //broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic.getStringValue(0));
+                broadcastUpdate(ACTION_DATA_AVAILABLE, Integer.toString(smartAQDataQueue.size()));
             } catch (Exception e){
                 //TODO: Handle exception
                 e.printStackTrace();
@@ -152,7 +148,7 @@ public class BluetoothLeService extends Service {
 
     @Override
     public void onDestroy(){
-        Toast.makeText(this, "Bluetoothservice stopped", Toast.LENGTH_SHORT).show();
+        close();
     }
 
     private void broadcastUpdate(final String action) {
@@ -161,17 +157,15 @@ public class BluetoothLeService extends Service {
     }
 
     private void broadcastUpdate(final String action,
-                                 final BluetoothGattCharacteristic characteristic) {
+                                 String data) {
         final Intent intent = new Intent(action);
-
-        String data = characteristic.getStringValue(0);
         intent.putExtra(EXTRA_DATA, data);
         sendBroadcast(intent);
     }
 
     public class LocalBinder extends Binder {
-        BluetoothLeService getService() {
-            return BluetoothLeService.this;
+        BLEReadDevice getService() {
+            return BLEReadDevice.this;
         }
     }
 
@@ -246,20 +240,6 @@ public class BluetoothLeService extends Service {
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         return true;
-    }
-
-    /**
-     * Disconnects an existing connection or cancel a pending connection. The disconnection result
-     * is reported asynchronously through the
-     * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
-     * callback.
-     */
-    public void disconnect() {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
-            return;
-        }
-        mBluetoothGatt.disconnect();
     }
 
     /**
