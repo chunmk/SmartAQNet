@@ -30,9 +30,11 @@
 
     <edu.teco.smartaqnet.BTStateButton
         android:id="@+id/btStateButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="142dp"
+        android:layout_height="77dp"
+        android:background="@drawable/buttonshape"
         android:text="@string/control_button"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.54"
