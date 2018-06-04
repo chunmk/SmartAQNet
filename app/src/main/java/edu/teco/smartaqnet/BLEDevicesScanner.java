@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -23,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -81,7 +81,7 @@ class BLEDevicesScanner {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             ((Activity) context).startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
-        smartAQDataQueue = (new SmartAQDataQueue(mainActivity)).getSmartAQDataQueue();
+        smartAQDataQueue = (new SmartAQDataQueue(mainActivity.getCacheDir().toString())).getSmartAQDataQueue();
 
     }
 
@@ -137,6 +137,10 @@ class BLEDevicesScanner {
         showScanResults();
     }
 
+    /*
+    TODO: Actually activates at maximum three buttons to connect to devices
+    Eventually using ExpandableListview is better
+     */
     private void showScanResults(){
         if(deviceIndex > 0){
             SetMainView.setView(SetMainView.views.devicesFound, mainActivity, bleConnectionButton);
@@ -177,6 +181,7 @@ class BLEDevicesScanner {
             }
             // Automatically connects to the device upon successful start-up initialization.
             mBluetoothLeService.connect(bleDeviceAdress);
+            mBluetoothLeService.setOutPutDir(mainActivity.getCacheDir().toString());
         }
 
         @Override
@@ -192,19 +197,16 @@ class BLEDevicesScanner {
     private void connectToDeviceSelected(int deviceSelected){
         bleDeviceAdress = devicesDiscovered.get(deviceSelected).getAddress();
         gattServiceIntent = new Intent(mainActivity, BluetoothLeService.class);
-        mainActivity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        gattServiceIntent.putExtra("outPutDir", mainActivity.getCacheDir().toString());
+        gattServiceIntent.putExtra("bleDeviceAdress", bleDeviceAdress);
+        //mainActivity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        mainActivity.startService(gattServiceIntent);
         mainActivity.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         SetMainView.setView(SetMainView.views.connected, mainActivity, bleConnectionButton);
-
-
-        //TODO: bleConnectionButton anpassen
-//        deviceController = new BLEConnectedDeviceController(context, bleConnectionButton);
-//        deviceController.setBluetoothGatt(devicesDiscovered.get(deviceSelected).connectGatt(context, false, deviceController.btleGattCallback));
-//        deviceController.setDisconnect();
     }
 
     public void disconnectDevice(){
-        mainActivity.unbindService(mServiceConnection);
+        mainActivity.stopService(gattServiceIntent);
         SetMainView.setView(SetMainView.views.startScan, mainActivity, bleConnectionButton);
     }
     // Handles various events fired by the Service.
@@ -231,25 +233,20 @@ class BLEDevicesScanner {
                 case BluetoothLeService.ACTION_DATA_AVAILABLE:
                     //TODO: Daten anzeigen
                     String result = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                    try {
-                        smartAQDataQueue.add(result);
-                    } catch (Exception e) {
-                        //TODO IOException adding data to smartAQDataQueue behandeln
-                        e.printStackTrace();
-                    }
-                    try {
-                        result = smartAQDataQueue.peek();
-                    } catch (Exception e){
-                        //TODO IOException reading data from smartAQDataQueue behandeln
-                        e.printStackTrace();
-                    }
                     ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(result);
-                    try {
-                        smartAQDataQueue.remove();
-                    } catch (Exception e){
-                        //TODO IOException removing data to smartAQDataQueue behandeln
-                        e.printStackTrace();
-                    }
+
+//                    try {
+//                        smartAQDataQueue.add(result);
+//                    } catch (Exception e){
+//                        //TODO IOException reading data from smartAQDataQueue behandeln
+//                        e.printStackTrace();
+//                    }
+//                    try {
+//                        smartAQDataQueue.remove();
+//                    } catch (Exception e){
+//                        //TODO IOException removing data to smartAQDataQueue behandeln
+//                        e.printStackTrace();
+//                    }
 
                     break;
                 default:

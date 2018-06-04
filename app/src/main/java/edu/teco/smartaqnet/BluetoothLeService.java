@@ -16,6 +16,7 @@
 
 package edu.teco.smartaqnet;
 
+import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -34,8 +35,10 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.List;
 import java.util.UUID;
+
+import edu.teco.smartaqnet.buffering.ObjectQueue;
+import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
@@ -48,7 +51,8 @@ public class BluetoothLeService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
-    private int mConnectionState = STATE_DISCONNECTED;
+    private ObjectQueue<String> smartAQDataQueue;
+    private String outPutDir;
 
     // Stops scanning after 2 seconds.
     private Handler mHandler = new Handler();
@@ -77,6 +81,17 @@ public class BluetoothLeService extends Service {
     public final static String EXTRA_DATA =
             "EXTRA_DATA";
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        setOutPutDir(intent.getStringExtra("outPutDir"));
+        initialize();
+        connect(intent.getStringExtra("bleDeviceAdress"));
+        return START_REDELIVER_INTENT;
+    }
+
+    public void setOutPutDir(String outPutDir){
+        this.outPutDir = outPutDir;
+    }
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -86,7 +101,6 @@ public class BluetoothLeService extends Service {
             switch (newState){
                 case BluetoothProfile.STATE_CONNECTED:
                     intentAction = ACTION_GATT_CONNECTED;
-                    mConnectionState = STATE_CONNECTED;
                     broadcastUpdate(intentAction);
                     Log.i(TAG, "Connected to GATT server.");
 
@@ -94,7 +108,6 @@ public class BluetoothLeService extends Service {
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     intentAction = ACTION_GATT_DISCONNECTED;
-                    mConnectionState = STATE_DISCONNECTED;
                     Log.i(TAG, "Disconnected from GATT server.");
                     broadcastUpdate(intentAction);
                     break;
@@ -108,6 +121,7 @@ public class BluetoothLeService extends Service {
                 BluetoothGattService service = mBluetoothGatt.getService(SMARTAQ_SERVICE_UUID);
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
                 setCharacteristicNotification(characteristic,true);
+                smartAQDataQueue = (new SmartAQDataQueue(outPutDir)).getSmartAQDataQueue();
 
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -126,7 +140,13 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            try {
+                smartAQDataQueue.add(characteristic.getStringValue(0));
+                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            } catch (Exception e){
+                //TODO: Handle exception
+                e.printStackTrace();
+            }
         }
     };
 
@@ -209,7 +229,6 @@ public class BluetoothLeService extends Service {
                 && mBluetoothGatt != null) {
             Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
-                mConnectionState = STATE_CONNECTING;
                 return true;
             } else {
                 return false;
@@ -226,7 +245,6 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
-        mConnectionState = STATE_CONNECTING;
         return true;
     }
 
@@ -308,17 +326,5 @@ public class BluetoothLeService extends Service {
             }
         }, SCAN_PERIOD);
 
-    }
-
-    /**
-     * Retrieves a list of supported GATT services on the connected device. This should be
-     * invoked only after {@code BluetoothGatt#discoverServices()} completes successfully.
-     *
-     * @return A {@code List} of supported services.
-     */
-    public List<BluetoothGattService> getSupportedGattServices() {
-        if (mBluetoothGatt == null) return null;
-
-        return mBluetoothGatt.getServices();
     }
 }
