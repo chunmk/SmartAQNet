@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import edu.teco.smartaqnet.buffering.ObjectQueue;
@@ -184,10 +183,5 @@ public class BLEConnectedDeviceController {
 
     public void setDisconnect(){
         bleConButton.setState(BLEConnectionButton.States.DISCONNECT);
-//        SetMainView.bleConnectionButton.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                disconnectDevice();
-//            }
-//        });
     }
 }

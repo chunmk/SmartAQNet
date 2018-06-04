@@ -44,9 +44,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    //TODO: App als Hintergrundapp laufen lassen
     //TODO: Verbindungsabbruch BLE checken
     //TODO: Settingspage
-    //TODO: App als Hintergrundapp laufen lassen
+    //TODO: Settingspage clear data smartAQData.clear()
     //TODO: GPS-Verbindung
     //TODO: GPS-Track
     //TODO: WLAN konnektieren, Verbindungsabbruch verarbeiten
