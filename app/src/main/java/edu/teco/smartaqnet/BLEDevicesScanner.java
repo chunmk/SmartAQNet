@@ -8,11 +8,15 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -34,6 +38,8 @@ class BLEDevicesScanner {
     private BLEConnectionButton bleConnectionButton;
     private int deviceIndex = 0;
     private ArrayList<BluetoothDevice> devicesDiscovered = new ArrayList<>();
+    private String bleDeviceAdress;
+
     // Stops scanning after 30 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 5000;
@@ -146,21 +152,33 @@ class BLEDevicesScanner {
     }
 
 
-//    private void connectToDeviceSelected(int deviceSelected){
-//        deviceController = new BLEConnectedDeviceController(context);
-//        deviceController.setBluetoothGatt(devicesDiscovered.get(deviceSelected).connectGatt(context, false, deviceController.btleGattCallback));
-//        //TODO: Checken ob Verbindung steht
-//        deviceController.setDisconnect();
-//        SetMainView.setView(SetMainView.views.connected);
-//    }
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        BluetoothLeService mBluetoothLeService;
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(bleDeviceAdress);
+        }
 
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
 
     private void connectToDeviceSelected(int deviceSelected){
-        deviceController = new BLEConnectedDeviceController(context, bleConnectionButton);
-        deviceController.setBluetoothGatt(devicesDiscovered.get(deviceSelected).connectGatt(context, false, deviceController.btleGattCallback));
-        //TODO: Checken ob Verbindung steht
-        deviceController.setDisconnect();
-        SetMainView.setView(SetMainView.views.connected, (Activity) context, bleConnectionButton);
+
+        bleDeviceAdress = devicesDiscovered.get(deviceSelected).getAddress();
+        Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
+        context.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        //TODO: bleConnectionButton anpassen
+//        deviceController = new BLEConnectedDeviceController(context, bleConnectionButton);
+//        deviceController.setBluetoothGatt(devicesDiscovered.get(deviceSelected).connectGatt(context, false, deviceController.btleGattCallback));
+//        deviceController.setDisconnect();
+//        SetMainView.setView(SetMainView.views.connected, (Activity) context, bleConnectionButton);
     }
 
     public void disconnectDevice(){
