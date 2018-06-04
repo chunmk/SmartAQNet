@@ -40,10 +40,9 @@ public class BLEConnectedDeviceController {
         bleConButton = bleConnectionButton;
         mainActivity = (Activity) context;
         //Initialize persistant FIFO-Buffer for notifications from BLE
-        smartAQDataQueue = (new SmartAQDataQueue(mainActivity)).getSmartAQDataQueue();
     }
 
-    // Stops scanning after 30 seconds.
+    // Stops scanning after 5 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 5000;
 

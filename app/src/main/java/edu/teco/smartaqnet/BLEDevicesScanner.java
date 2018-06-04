@@ -4,14 +4,17 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -19,34 +22,39 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import edu.teco.smartaqnet.buffering.ObjectQueue;
+import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
 class BLEDevicesScanner {
 
-    private final int MAXDEVICES = 3;
+    private final static String TAG = BLEDevicesScanner.class.getSimpleName();
 
+    private final int MAXDEVICES = 3;
     private BluetoothLeScanner btScanner;
 
     private final static int REQUEST_ENABLE_BT = 1;
 
-    private BLEConnectedDeviceController deviceController;
-
-    private Context context;
+    private Activity mainActivity;
     private BLEConnectionButton bleConnectionButton;
     private int deviceIndex = 0;
     private ArrayList<BluetoothDevice> devicesDiscovered = new ArrayList<>();
     private String bleDeviceAdress;
+    private Intent gattServiceIntent;
 
     // Stops scanning after 30 seconds.
     private Handler mHandler = new Handler();
-    private static final long SCAN_PERIOD = 5000;
+    private static final long SCAN_PERIOD = 10000;
 
+    private ObjectQueue<String> smartAQDataQueue;
 
     protected BLEDevicesScanner(Context context, BLEConnectionButton bleConnectionButton) {
-        this.context = context;
+        this.mainActivity = (Activity) context;
         this.bleConnectionButton = bleConnectionButton;
         BluetoothAdapter btAdapter = ((BluetoothManager) context.getSystemService(android.content.Context.BLUETOOTH_SERVICE)).getAdapter();
         //Check if Bluetooth is supported
@@ -66,11 +74,15 @@ class BLEDevicesScanner {
         try {
             btScanner = btAdapter.getBluetoothLeScanner();
         } catch (NullPointerException e){
-            //TODO: Fehler behandel
+            //TODO: Fehler behandeln
         }
         /*Activate Bluetooth if not active*/
-        if (!btAdapter.isEnabled())
-            activateBT(context);
+        if (!btAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            ((Activity) context).startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        }
+        smartAQDataQueue = (new SmartAQDataQueue(mainActivity)).getSmartAQDataQueue();
+
     }
 
     // Device scan callback.
@@ -94,7 +106,7 @@ class BLEDevicesScanner {
      * Scanning for AQNet Services
      */
     public void startDetectingDevices() {
-        setView(SetMainView.views.scanning,(Activity) context, bleConnectionButton);
+        setView(SetMainView.views.scanning, mainActivity, bleConnectionButton);
         deviceIndex = 0;
         devicesDiscovered.clear();
         AsyncTask.execute(new Runnable() {
@@ -127,14 +139,13 @@ class BLEDevicesScanner {
 
     private void showScanResults(){
         if(deviceIndex > 0){
-            SetMainView.setView(SetMainView.views.devicesFound, (Activity) context, bleConnectionButton);
+            SetMainView.setView(SetMainView.views.devicesFound, mainActivity, bleConnectionButton);
             setDeviceButtons();
         } else
-            SetMainView.setView(SetMainView.views.noDevicesFound, (Activity) context, bleConnectionButton);
+            SetMainView.setView(SetMainView.views.noDevicesFound, mainActivity, bleConnectionButton);
     }
 
     private void setDeviceButtons(){
-        Activity mainActivity = (Activity) context;
         Button[] deviceButtons = {mainActivity.findViewById(R.id.device1_button),
                                   mainActivity.findViewById(R.id.device2_button),
                                   mainActivity.findViewById(R.id.device3_button)};
@@ -157,7 +168,13 @@ class BLEDevicesScanner {
         BluetoothLeService mBluetoothLeService;
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
+
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+
+                mainActivity.finish();
+            }
             // Automatically connects to the device upon successful start-up initialization.
             mBluetoothLeService.connect(bleDeviceAdress);
         }
@@ -168,27 +185,87 @@ class BLEDevicesScanner {
         }
     };
 
+    /*
+    Starts connection to the selected device as a service,
+    defined in BluetoothLEService
+     */
     private void connectToDeviceSelected(int deviceSelected){
-
         bleDeviceAdress = devicesDiscovered.get(deviceSelected).getAddress();
-        Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
-        context.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        gattServiceIntent = new Intent(mainActivity, BluetoothLeService.class);
+        mainActivity.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        mainActivity.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        SetMainView.setView(SetMainView.views.connected, mainActivity, bleConnectionButton);
+
 
         //TODO: bleConnectionButton anpassen
 //        deviceController = new BLEConnectedDeviceController(context, bleConnectionButton);
 //        deviceController.setBluetoothGatt(devicesDiscovered.get(deviceSelected).connectGatt(context, false, deviceController.btleGattCallback));
 //        deviceController.setDisconnect();
-//        SetMainView.setView(SetMainView.views.connected, (Activity) context, bleConnectionButton);
     }
 
     public void disconnectDevice(){
-        deviceController.disconnectDevice();
+        mainActivity.unbindService(mServiceConnection);
+        SetMainView.setView(SetMainView.views.startScan, mainActivity, bleConnectionButton);
     }
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch(action){
+                case BluetoothLeService.ACTION_GATT_CONNECTED:
+                    bleConnectionButton.setState(BLEConnectionButton.States.DISCONNECT);
+                    break;
+                case BluetoothLeService.ACTION_GATT_DISCONNECTED:
+                    //TODO: testen ob als Abbruchkriterium nutzbar
+                    SetMainView.setView(SetMainView.views.startScan, mainActivity, bleConnectionButton);
+                    break;
+                case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
+                    //Not used
+                    break;
+                case BluetoothLeService.ACTION_DATA_AVAILABLE:
+                    //TODO: Daten anzeigen
+                    String result = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                    try {
+                        smartAQDataQueue.add(result);
+                    } catch (Exception e) {
+                        //TODO IOException adding data to smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
+                    try {
+                        result = smartAQDataQueue.peek();
+                    } catch (Exception e){
+                        //TODO IOException reading data from smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
+                    ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(result);
+                    try {
+                        smartAQDataQueue.remove();
+                    } catch (Exception e){
+                        //TODO IOException removing data to smartAQDataQueue behandeln
+                        e.printStackTrace();
+                    }
 
-    private void activateBT(Context context) {
-        // Bluetooth is not enable :)
-        Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        ((Activity) context).startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+                    break;
+                default:
+                    //TODO Handle default
+
+            }
+        }
+    };
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
     }
 
 }

@@ -41,6 +41,7 @@ public class BLEConnectionButton extends android.support.v7.widget.AppCompatButt
                         break;
                     case DISCONNECT:
                         //Disconnect Button pressed
+                        //TODO: wie disconnect
                         bleHandler.disconnectDevice();
                         break;
                     default:
