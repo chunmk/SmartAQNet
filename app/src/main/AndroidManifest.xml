@@ -26,7 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".BLEReadDevice" android:enabled="true"/>
+        <service android:name=".BLEReadService" android:enabled="true"/>
+        <service android:name=".SmartAQDataBufferService" android:enabled="true"/>
     </application>
 
 </manifest>

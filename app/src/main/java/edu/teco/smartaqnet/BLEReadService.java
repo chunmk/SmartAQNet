@@ -34,8 +34,11 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
+import edu.teco.smartaqnet.buffering.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.buffering.ObjectQueue;
 import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
 
@@ -43,8 +46,8 @@ import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class BLEReadDevice extends Service {
-    private final static String TAG = BLEReadDevice.class.getSimpleName();
+public class BLEReadService extends Service {
+    private final static String TAG = BLEReadService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -53,6 +56,7 @@ public class BLEReadDevice extends Service {
     private ObjectQueue<String> smartAQDataQueue;
     private String outPutDir;
 
+    //Just to delay operations
     // Stops scanning after 2 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 2000;
@@ -75,6 +79,10 @@ public class BLEReadDevice extends Service {
             "ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "EXTRA_DATA";
+    public final static String EXTRA_BYTES =
+            "EXTRA_BYTES";
+    public final static String EXTRA_ASIZE =
+            "EXTRA_ASIZE";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -116,7 +124,6 @@ public class BLEReadDevice extends Service {
                 BluetoothGattService service = mBluetoothGatt.getService(SMARTAQ_SERVICE_UUID);
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);
                 setCharacteristicNotification(characteristic,true);
-                smartAQDataQueue = (new SmartAQDataQueue(outPutDir)).getSmartAQDataQueue();
 
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -128,7 +135,11 @@ public class BLEReadDevice extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic.getStringValue(0));
+                characteristic.getStringValue(0);
+                SmartAQDataObject data = new SmartAQDataObject();
+                data.setBleDustData(characteristic.getStringValue(0));
+                byte[] bytes = ObjectByteConverterUtility.convertToByte(data);
+                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes);
             }
         }
 
@@ -136,9 +147,10 @@ public class BLEReadDevice extends Service {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
             try {
-                smartAQDataQueue.add(characteristic.getStringValue(0));
-                //broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic.getStringValue(0));
-                broadcastUpdate(ACTION_DATA_AVAILABLE, Integer.toString(smartAQDataQueue.size()));
+                SmartAQDataObject data = new SmartAQDataObject();
+                data.setBleDustData(characteristic.getStringValue(0));
+                byte[] bytes = ObjectByteConverterUtility.convertToByte(data);
+                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes);
             } catch (Exception e){
                 //TODO: Handle exception
                 e.printStackTrace();
@@ -157,15 +169,16 @@ public class BLEReadDevice extends Service {
     }
 
     private void broadcastUpdate(final String action,
-                                 String data) {
+                                 byte[] data) {
         final Intent intent = new Intent(action);
-        intent.putExtra(EXTRA_DATA, data);
+        intent.putExtra(EXTRA_BYTES, data);
+        intent.putExtra(EXTRA_ASIZE, data.length);
         sendBroadcast(intent);
     }
 
     public class LocalBinder extends Binder {
-        BLEReadDevice getService() {
-            return BLEReadDevice.this;
+        BLEReadService getService() {
+            return BLEReadService.this;
         }
     }
 

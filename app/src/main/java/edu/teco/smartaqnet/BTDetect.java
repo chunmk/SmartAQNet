@@ -14,12 +14,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import edu.teco.smartaqnet.buffering.ObjectByteConverterUtility;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
@@ -161,7 +164,7 @@ public class BTDetect extends Activity{
      */
     private void connectToDeviceSelected(int deviceSelected){
         bleDeviceAdress = devicesDiscovered.get(deviceSelected).getAddress();
-        gattServiceIntent = new Intent(mainActivity, BLEReadDevice.class);
+        gattServiceIntent = new Intent(mainActivity, BLEReadService.class);
         gattServiceIntent.putExtra("outPutDir", mainActivity.getCacheDir().toString());
         gattServiceIntent.putExtra("bleDeviceAdress", bleDeviceAdress);
         mainActivity.startService(gattServiceIntent);
@@ -184,21 +187,22 @@ public class BTDetect extends Activity{
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             switch(action){
-                case BLEReadDevice.ACTION_GATT_CONNECTED:
+                case BLEReadService.ACTION_GATT_CONNECTED:
                     bleConnectionButton.setState(BTStateButton.States.DISCONNECT);
                     break;
-                case BLEReadDevice.ACTION_GATT_DISCONNECTED:
+                case BLEReadService.ACTION_GATT_DISCONNECTED:
                     //TODO: testen ob als Abbruchkriterium nutzbar
                     disconnectDevice();
                     SetMainView.setView(SetMainView.views.startScan, mainActivity, bleConnectionButton);
                     break;
-                case BLEReadDevice.ACTION_GATT_SERVICES_DISCOVERED:
+                case BLEReadService.ACTION_GATT_SERVICES_DISCOVERED:
                     //Not used
                     break;
-                case BLEReadDevice.ACTION_DATA_AVAILABLE:
+                case BLEReadService.ACTION_DATA_AVAILABLE:
                     //TODO: Daten anzeigen
-                    String result = intent.getStringExtra(BLEReadDevice.EXTRA_DATA);
-                    ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(result);
+                    byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
+                    SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
+                    ((TextView) mainActivity.findViewById(R.id.deviceValueText)).setText(smartAQData.getBleDustData());
                     break;
                 default:
                     //TODO Handle default
@@ -209,11 +213,10 @@ public class BTDetect extends Activity{
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BLEReadDevice.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BLEReadDevice.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BLEReadDevice.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BLEReadDevice.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BLEReadService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BLEReadService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BLEReadService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
-
 }
