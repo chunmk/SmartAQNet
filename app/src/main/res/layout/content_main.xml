@@ -10,15 +10,15 @@
 
     <TextView
         android:id="@+id/deviceValueText"
-        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/btStateButton"
         android:fontFamily="serif-monospace"
+        android:gravity="center"
         android:text="Empty"
         android:textAlignment="center"
         android:textColor="@android:color/holo_orange_dark"
-        android:textSize="42sp"
+        android:textSize="36sp"
         android:textStyle="bold"
         android:typeface="normal"
         android:visibility="invisible"
