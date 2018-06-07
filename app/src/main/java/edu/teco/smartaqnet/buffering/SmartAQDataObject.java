@@ -1,4 +1,4 @@
-package edu.teco.smartaqnet;
+package edu.teco.smartaqnet.buffering;
 
 import android.support.annotation.NonNull;
 
@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-class SmartAQDataObject implements Serializable{
+public class SmartAQDataObject implements Serializable{
     private String bleDustData;
     private static final long serialVersionUID = 6526472154622876147L;
 

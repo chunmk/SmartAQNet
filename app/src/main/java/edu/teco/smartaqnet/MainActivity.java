@@ -6,6 +6,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import edu.teco.smartaqnet.bluetooth.BTDetect;
+
 import static edu.teco.smartaqnet.SetMainView.*;
 
 public class MainActivity extends AppCompatActivity {

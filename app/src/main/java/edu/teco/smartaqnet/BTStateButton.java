@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
+import edu.teco.smartaqnet.bluetooth.BTDetect;
+
 public class BTStateButton extends android.support.v7.widget.AppCompatButton{
     public enum States {SCAN, STOP, DISCONNECT}
     private States stateTriggered;
