@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edu.teco.smartaqnet;
+package edu.teco.smartaqnet.bluetooth;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -34,13 +34,11 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.UUID;
 
+import edu.teco.smartaqnet.buffering.SmartAQDataObject;
 import edu.teco.smartaqnet.buffering.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.buffering.ObjectQueue;
-import edu.teco.smartaqnet.buffering.SmartAQDataQueue;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
