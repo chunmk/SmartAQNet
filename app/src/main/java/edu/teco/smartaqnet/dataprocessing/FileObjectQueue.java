@@ -1,5 +1,5 @@
 // Copyright 2012 Square, Inc.
-package edu.teco.smartaqnet.buffering;
+package edu.teco.smartaqnet.dataprocessing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package edu.teco.smartaqnet.buffering;
+package edu.teco.smartaqnet.dataprocessing;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -12,7 +12,7 @@ import edu.teco.smartaqnet.bluetooth.BLEReadService;
 
 public class
 
-SmartAQDataBufferService extends Service {
+SmartAQDataService extends Service {
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         registerReceiver();

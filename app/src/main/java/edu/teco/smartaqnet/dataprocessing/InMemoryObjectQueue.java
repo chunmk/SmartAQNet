@@ -1,5 +1,5 @@
 // Copyright 2012 Square, Inc.
-package edu.teco.smartaqnet.buffering;
+package edu.teco.smartaqnet.dataprocessing;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

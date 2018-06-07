@@ -1,4 +1,4 @@
-package edu.teco.smartaqnet.buffering;
+package edu.teco.smartaqnet.dataprocessing;
 
 import android.support.annotation.NonNull;
 

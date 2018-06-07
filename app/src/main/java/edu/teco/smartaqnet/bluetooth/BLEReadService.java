@@ -36,9 +36,9 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
-import edu.teco.smartaqnet.buffering.SmartAQDataObject;
-import edu.teco.smartaqnet.buffering.ObjectByteConverterUtility;
-import edu.teco.smartaqnet.buffering.ObjectQueue;
+import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
+import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
+import edu.teco.smartaqnet.dataprocessing.ObjectQueue;
 
 /**
  * Service for managing connection and data communication with a GATT server hosted on a

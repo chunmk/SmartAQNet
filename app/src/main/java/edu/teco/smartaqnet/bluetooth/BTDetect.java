@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import edu.teco.smartaqnet.BTStateButton;
 import edu.teco.smartaqnet.R;
 import edu.teco.smartaqnet.SetMainView;
-import edu.teco.smartaqnet.buffering.ObjectByteConverterUtility;
-import edu.teco.smartaqnet.buffering.SmartAQDataObject;
+import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
+import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
