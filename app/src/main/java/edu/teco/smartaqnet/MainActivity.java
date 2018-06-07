@@ -1,5 +1,6 @@
 package edu.teco.smartaqnet;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -7,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import edu.teco.smartaqnet.bluetooth.BTDetect;
+import edu.teco.smartaqnet.dataprocessing.SmartAQDataService;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
@@ -28,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
         //Activate Bluetooth
         bleHandler = new BTDetect(this, btStateButton);
         btStateButton.setClickListener(bleHandler);
+        //Starting data processing service
+        Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
+        startService(smartAQDataService);
+
+
+
     }
 
 
