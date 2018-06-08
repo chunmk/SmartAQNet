@@ -179,6 +179,9 @@ public class BTDetect extends Activity{
         mainActivity.stopService(gattServiceIntent);
         SetMainView.setView(SetMainView.views.startScan, mainActivity, bleConnectionButton);
     }
+
+    //TODO: Verlegen in ShowDeviceMeasurements
+
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
     // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
