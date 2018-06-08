@@ -36,6 +36,7 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
     }
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
@@ -48,5 +49,7 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
     implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintlayoutVersion"
     implementation "de.fraunhofer.iosb.ilt:FROST-Client:0.15"
-
+    implementation 'org.apache.httpcomponents:httpcore:4.4.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5'
+    implementation 'com.google.code.gson:gson:2.8.2'
 }
