@@ -49,7 +49,8 @@ SmartAQDataService extends Service {
                     byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
                     SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
                     Gson gsonloc = new Gson();
-                    String locgson = gsonloc.toJson(new Location());
+                    Location loc = new Location();
+                    String locgson = gsonloc.toJson(loc);
                     String obsgson = gsonloc.toJson(new Observation(smartAQData.getBleDustData()));
                 }
         }

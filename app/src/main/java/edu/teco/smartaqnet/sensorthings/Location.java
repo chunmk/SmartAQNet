@@ -21,7 +21,7 @@ public class Location {
     public Location() {
         String uid = md5();
         GPSData gps = new GPSData();
-        location  = gps.getLocation().toString();
+        location  = "1234";//gps.getLocation().toString();
         id = uid;
         thing = new Thing();
         sensor = new Sensor();
