@@ -7,12 +7,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.google.gson.Gson;
+
+import java.util.Locale;
 
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
+import edu.teco.smartaqnet.sensorthings.Location;
+import edu.teco.smartaqnet.sensorthings.Observation;
 
 public class
 
 SmartAQDataService extends Service {
+
+    private final String TAG = SmartAQDataService.class.getName();
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         registerReceiver();
@@ -35,8 +44,14 @@ SmartAQDataService extends Service {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
                 if(action.equals(BLEReadService.ACTION_DATA_AVAILABLE)) {
-                //TODO: Daten verarbeiten
-            }
+                    //TODO: Daten verarbeiten
+                    Log.d(TAG, "Received data in SmartAQDataservice");
+                    byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
+                    SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
+                    Gson gsonloc = new Gson();
+                    String locgson = gsonloc.toJson(new Location());
+                    String obsgson = gsonloc.toJson(new Observation(smartAQData.getBleDustData()));
+                }
         }
     };
 
