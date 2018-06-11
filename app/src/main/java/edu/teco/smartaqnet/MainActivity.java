@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 import edu.teco.smartaqnet.bluetooth.BTDetect;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataService;
@@ -24,6 +26,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
+//        Window window = getWindow();
+//        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        int col = Integer.parseInt("57A117", 16);
+//        window.setStatusBarColor(Integer.parseInt("57A117", 16) );
+
+
         //Starting data processing service
         Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
         startService(smartAQDataService);

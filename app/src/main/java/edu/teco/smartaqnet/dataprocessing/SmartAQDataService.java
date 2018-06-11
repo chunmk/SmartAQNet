@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
 import edu.teco.smartaqnet.sensorthings.Datastream;
 import edu.teco.smartaqnet.sensorthings.Observation;
-import edu.teco.smartaqnet.sensorthings.PostData;
+import edu.teco.smartaqnet.http.HttpPostData;
 
 public class
 
@@ -74,7 +74,7 @@ SmartAQDataService extends Service {
         String gsonobservedproperty = gson.toJson(datastream.getObservedProperty());
         String gsonthing = gson.toJson(datastream.getThing());
         String gsondatastream = gson.toJson(datastream);
-        PostData.makeRequest("http://smartaqnet-dev:8080/FROST-Server/v1.0/Sensors", gsonsensor);
+        HttpPostData.startJsonPost("http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors", gsonsensor);
         //System.out.println("Hier");
     }
 }

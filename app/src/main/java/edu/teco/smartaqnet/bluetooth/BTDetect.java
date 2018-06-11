@@ -259,7 +259,7 @@ public class BTDetect extends Activity{
         alert.show();
 
         try{ Looper.loop(); }
-        catch(RuntimeException e){}
+        catch(RuntimeException e){e.printStackTrace();}
 
         if (device_name.isEmpty())
             device_name = "Teco-AQNode";

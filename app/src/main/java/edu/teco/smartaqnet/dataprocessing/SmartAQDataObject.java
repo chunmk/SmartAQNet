@@ -18,10 +18,11 @@ public class SmartAQDataObject implements Serializable{
     public String getBleDustData(){
         return bleDustData;
     }
+
     @NonNull
     private void writeObject( ObjectOutputStream oos ) throws IOException
     {
-        oos.defaultWriteObject();  // Schreib Name, aber kein Alter
+        oos.defaultWriteObject();
     }
 
     @NonNull
@@ -29,7 +30,7 @@ public class SmartAQDataObject implements Serializable{
     {
         try
         {
-            ois.defaultReadObject(); // Lies Name, aber ohne Alter
+            ois.defaultReadObject();
         }
         catch ( ClassNotFoundException e )
         {
