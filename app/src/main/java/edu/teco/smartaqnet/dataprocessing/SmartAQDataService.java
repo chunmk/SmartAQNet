@@ -1,6 +1,5 @@
 package edu.teco.smartaqnet.dataprocessing;
 
-import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,13 +11,8 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import java.util.Locale;
-
-import edu.teco.smartaqnet.ApplicationGlobal;
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
-import edu.teco.smartaqnet.gps.GPSData;
 import edu.teco.smartaqnet.sensorthings.Datastream;
-import edu.teco.smartaqnet.sensorthings.Location;
 import edu.teco.smartaqnet.sensorthings.Observation;
 import edu.teco.smartaqnet.sensorthings.PostData;
 

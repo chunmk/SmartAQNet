@@ -13,6 +13,7 @@ public class Observation {
     @SerializedName("Datastream")
     //Todo: Passenden Datastream holen
     private Datastream data = new Datastream("thing");
+    private FeatureOfInterest feature;
 
     public Observation(String result){
         String timeStamp = TimestampUtils.getISO8601StringForCurrentDate();
@@ -21,6 +22,7 @@ public class Observation {
         this.resultTime = timeStamp;
         this.result = result;
         this.id = uid;
+        this.feature = new FeatureOfInterest();
     }
 
 }

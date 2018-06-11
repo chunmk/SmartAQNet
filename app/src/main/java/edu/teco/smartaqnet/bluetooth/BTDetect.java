@@ -2,7 +2,6 @@ package edu.teco.smartaqnet.bluetooth;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -24,18 +23,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 
-import edu.teco.smartaqnet.ApplicationGlobal;
 import edu.teco.smartaqnet.BTStateButton;
 import edu.teco.smartaqnet.R;
 import edu.teco.smartaqnet.SetMainView;
 import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
-import edu.teco.smartaqnet.sensorthings.Datastream;
-import edu.teco.smartaqnet.sensorthings.Location;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
