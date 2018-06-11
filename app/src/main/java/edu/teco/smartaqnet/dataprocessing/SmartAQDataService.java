@@ -1,5 +1,6 @@
 package edu.teco.smartaqnet.dataprocessing;
 
+import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,15 +14,20 @@ import com.google.gson.Gson;
 
 import java.util.Locale;
 
+import edu.teco.smartaqnet.ApplicationGlobal;
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
+import edu.teco.smartaqnet.gps.GPSData;
+import edu.teco.smartaqnet.sensorthings.Datastream;
 import edu.teco.smartaqnet.sensorthings.Location;
 import edu.teco.smartaqnet.sensorthings.Observation;
+import edu.teco.smartaqnet.sensorthings.PostData;
 
 public class
 
 SmartAQDataService extends Service {
 
     private final String TAG = SmartAQDataService.class.getName();
+    private boolean isCreatedDatastream;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         registerReceiver();
@@ -44,14 +50,16 @@ SmartAQDataService extends Service {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
                 if(action.equals(BLEReadService.ACTION_DATA_AVAILABLE)) {
+                    if (!isCreatedDatastream) {
+                        createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
+                    }
+
                     //TODO: Daten verarbeiten
-                    Log.d(TAG, "Received data in SmartAQDataservice");
                     byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
                     SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
-                    Gson gsonloc = new Gson();
-                    Location loc = new Location();
-                    String locgson = gsonloc.toJson(loc);
-                    String obsgson = gsonloc.toJson(new Observation(smartAQData.getBleDustData()));
+                    Gson gson = new Gson();
+                    String obsgson = gson.toJson(new Observation(smartAQData.getBleDustData()));
+                    Log.d(TAG, "Received data in SmartAQDataservice");
                 }
         }
     };
@@ -65,5 +73,14 @@ SmartAQDataService extends Service {
         intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
-
+    public void createDatastream(String device_name){
+        Datastream datastream = new Datastream(device_name);
+        Gson gson = new Gson();
+        String gsonsensor = gson.toJson(datastream.getSensor());
+        String gsonobservedproperty = gson.toJson(datastream.getObservedProperty());
+        String gsonthing = gson.toJson(datastream.getThing());
+        String gsondatastream = gson.toJson(datastream);
+        PostData.makeRequest("http://smartaqnet-dev:8080/FROST-Server/v1.0/Sensors", gsonsensor);
+        //System.out.println("Hier");
+    }
 }

@@ -40,6 +40,8 @@ import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
 import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.dataprocessing.ObjectQueue;
 
+import static android.content.Intent.EXTRA_TEXT;
+
 /**
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
@@ -53,7 +55,7 @@ public class BLEReadService extends Service {
     private BluetoothGatt mBluetoothGatt;
     private ObjectQueue<String> smartAQDataQueue;
     private String outPutDir;
-
+    private String deviceName;
     //Just to delay operations
     // Stops scanning after 2 seconds.
     private Handler mHandler = new Handler();
@@ -75,24 +77,27 @@ public class BLEReadService extends Service {
             "ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE =
             "ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "EXTRA_DATA";
+
     public final static String EXTRA_BYTES =
             "EXTRA_BYTES";
     public final static String EXTRA_ASIZE =
             "EXTRA_ASIZE";
+    public final static String EXTRA_DEVICE_NAME =
+            "DEVICE_NAME";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         setOutPutDir(intent.getStringExtra("outPutDir"));
         initialize();
         connect(intent.getStringExtra("bleDeviceAdress"));
+        deviceName = intent.getStringExtra("device_name");
         return START_REDELIVER_INTENT;
     }
 
     public void setOutPutDir(String outPutDir){
         this.outPutDir = outPutDir;
     }
+
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -104,7 +109,6 @@ public class BLEReadService extends Service {
                     intentAction = ACTION_GATT_CONNECTED;
                     broadcastUpdate(intentAction);
                     Log.i(TAG, "Connected to GATT server.");
-
                     mBluetoothGatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
@@ -137,7 +141,7 @@ public class BLEReadService extends Service {
                 SmartAQDataObject data = new SmartAQDataObject();
                 data.setBleDustData(characteristic.getStringValue(0));
                 byte[] bytes = ObjectByteConverterUtility.convertToByte(data);
-                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes);
+                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes, deviceName);
             }
         }
 
@@ -148,7 +152,7 @@ public class BLEReadService extends Service {
                 SmartAQDataObject data = new SmartAQDataObject();
                 data.setBleDustData(characteristic.getStringValue(0));
                 byte[] bytes = ObjectByteConverterUtility.convertToByte(data);
-                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes);
+                broadcastUpdate(ACTION_DATA_AVAILABLE, bytes, deviceName);
             } catch (Exception e){
                 //TODO: Handle exception
                 e.printStackTrace();
@@ -167,10 +171,18 @@ public class BLEReadService extends Service {
     }
 
     private void broadcastUpdate(final String action,
-                                 byte[] data) {
+                                 byte[] data, String deviceName) {
         final Intent intent = new Intent(action);
         intent.putExtra(EXTRA_BYTES, data);
         intent.putExtra(EXTRA_ASIZE, data.length);
+        intent.putExtra(EXTRA_DEVICE_NAME, deviceName);
+        sendBroadcast(intent);
+    }
+
+    private void broadcastUpdate(final String action,
+                                 String deviceName) {
+        final Intent intent = new Intent(action);
+        intent.putExtra(EXTRA_DEVICE_NAME, deviceName);
         sendBroadcast(intent);
     }
 

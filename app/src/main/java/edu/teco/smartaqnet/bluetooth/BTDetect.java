@@ -2,6 +2,7 @@ package edu.teco.smartaqnet.bluetooth;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -15,17 +16,26 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
+import edu.teco.smartaqnet.ApplicationGlobal;
 import edu.teco.smartaqnet.BTStateButton;
 import edu.teco.smartaqnet.R;
 import edu.teco.smartaqnet.SetMainView;
 import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
+import edu.teco.smartaqnet.sensorthings.Datastream;
+import edu.teco.smartaqnet.sensorthings.Location;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
@@ -45,6 +55,7 @@ public class BTDetect extends Activity{
     private String bleDeviceAdress;
     private Intent gattServiceIntent;
 
+    private String device_name = "";
     // Stops scanning after 30 seconds.
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 10000;
@@ -166,10 +177,12 @@ public class BTDetect extends Activity{
     defined in BluetoothLEService
      */
     private void connectToDeviceSelected(int deviceSelected){
+        String device_name = nameSelectedDevice();
         bleDeviceAdress = devicesDiscovered.get(deviceSelected).getAddress();
         gattServiceIntent = new Intent(mainActivity, BLEReadService.class);
         gattServiceIntent.putExtra("outPutDir", mainActivity.getCacheDir().toString());
         gattServiceIntent.putExtra("bleDeviceAdress", bleDeviceAdress);
+        gattServiceIntent.putExtra("device_name", device_name);
         mainActivity.startService(gattServiceIntent);
         mainActivity.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         SetMainView.setView(SetMainView.views.connected, mainActivity, bleConnectionButton);
@@ -224,5 +237,38 @@ public class BTDetect extends Activity{
         intentFilter.addAction(BLEReadService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
         return intentFilter;
+    }
+    private synchronized String nameSelectedDevice(){
+
+        final Handler handler = new Handler()
+        {
+            @Override
+            public void handleMessage(Message mesg)
+            {
+                throw new RuntimeException();
+            }
+        };
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+        final EditText input = new EditText(mainActivity);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setMessage("Please name the device:")
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        device_name = input.getText().toString();
+                        handler.sendMessage(handler.obtainMessage());
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+
+        try{ Looper.loop(); }
+        catch(RuntimeException e){}
+
+        if (device_name.isEmpty())
+            device_name = "Teco-AQNode";
+        return device_name;
     }
 }

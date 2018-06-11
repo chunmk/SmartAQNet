@@ -24,18 +24,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //Starting data processing service
+        Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
+        startService(smartAQDataService);
         /*Set first view of app and activate Button that controls BLE Connection*/
         btStateButton = findViewById(R.id.btStateButton);
         setView(views.startScan, this, btStateButton);
         //Activate Bluetooth
         bleHandler = new BTDetect(this, btStateButton);
         btStateButton.setClickListener(bleHandler);
-        //Starting data processing service
-        Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
-        startService(smartAQDataService);
-
-
-
     }
 
 

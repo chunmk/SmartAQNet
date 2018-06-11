@@ -3,15 +3,21 @@ package edu.teco.smartaqnet;
 import android.app.Activity;
 import android.app.Application;
 
+import edu.teco.smartaqnet.sensorthings.Datastream;
+
 public class ApplicationGlobal extends Application{
 
-    private Activity mainActivity;
+    private Datastream datastream;
 
-    public void setMainActivity(Activity mainActivity){
-        this.mainActivity = mainActivity;
+    public ApplicationGlobal(){
+        super();
     }
 
-    public Activity getMainActivity() {
-        return mainActivity;
+    public void setDatastream(Datastream datastream){
+        this.datastream = datastream;
+    }
+
+    public Datastream getDatastream() {
+        return datastream;
     }
 }
