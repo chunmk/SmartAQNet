@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class SmartAQDataQueue {
 
-    private ObjectQueue<String> smartAQDataqueue;
+    private ObjectQueue<SmartAQDataObject> smartAQDataqueue;
 
     public SmartAQDataQueue(String outputDir){
         String path = outputDir + "/data.tmp";
@@ -20,7 +20,7 @@ public class SmartAQDataQueue {
         }
     }
 
-    public ObjectQueue<String> getSmartAQDataQueue(){
+    public ObjectQueue<SmartAQDataObject> getSmartAQDataQueue(){
         return smartAQDataqueue;
     }
 

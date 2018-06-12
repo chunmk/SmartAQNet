@@ -10,13 +10,17 @@ import java.io.Serializable;
 public class SmartAQDataObject implements Serializable{
     private String bleDustData;
     private static final long serialVersionUID = 6526472154622876147L;
+    private String timeStamp;
 
     public void setBleDustData(String bleDustData){
         this.bleDustData = bleDustData;
     }
-
+    public void setTimeStamp(String timeStamp){ this .timeStamp = timeStamp; }
     public String getBleDustData(){
         return bleDustData;
+    }
+    public String getTimeStamp() {
+        return timeStamp;
     }
 
     @NonNull

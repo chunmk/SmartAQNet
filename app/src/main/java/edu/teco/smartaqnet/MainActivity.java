@@ -47,17 +47,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //TODO: Disconnect hat noch einen Fehler
     //TODO: Verbindungsabbruch BLE checken
     //TODO: Settingspage
     //TODO: Settingspage clear data smartAQData.clear()
     //TODO: GPS-Verbindung
-    //TODO: GPS-Trace
-    //TODO: WLAN konnektieren, Verbindungsabbruch verarbeiten
-    //TODO: Mobilen Dienst konnektieren, Verbindungsabbruch verarbeiten
     //TODO: Datenaufbereitung für senden
     //TODO: MQTT
     //TODO: Clear Data Button
+    //TODO: Ablauf Http, Success checken -> Daten aus FIFO entfernen(dann mehr Daten gleichzeitig immer x 2?), kein Success -> Datastream neu erzeugen, Anzahl gleichzeitig reset auf 1
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
