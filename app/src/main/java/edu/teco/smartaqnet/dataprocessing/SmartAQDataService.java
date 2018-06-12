@@ -80,7 +80,6 @@ public class SmartAQDataService extends Service {
                             String observationAsJson = gson.toJson(new Observation(smartAQData,getApplicationContext()));
                             HttpPostData.startJsonPost(observationsURL, observationAsJson, getApplicationContext());
                             //TODO: Http Success not Checked
-                        smartAQDataqueue.remove();
                         } catch (IOException e) {
                             //TODO: Unhandled Exception
                             e.printStackTrace();
@@ -98,7 +97,7 @@ public class SmartAQDataService extends Service {
                             }
                             //TODO: COntinue sending observations
                         }
-                        Log.d(TAG, "onReceive: HTTP_SUCESS: " + url);
+                        Log.d(TAG, "onReceive: HTTP_SUCCESS: " + url);
                         //TODO: Continue sending data in larger chunks
                         break;
                     case HttpPostData.ACTION_HTTP_POST_FAILED:

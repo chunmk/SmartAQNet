@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-public class HttpPostData extends Activity{
+public class HttpPostData{
 
     private static final String TAG = HttpPostData.class.getName();
     public static final String ACTION_HTTP_POST_SUCESS = "ACTION_HTTP_POST_SUCESS";
@@ -52,7 +52,7 @@ public class HttpPostData extends Activity{
                         in.close();
                         final Intent intent = new Intent(ACTION_HTTP_POST_SUCESS);
                         intent.putExtra(EXTRA_URL, surl);
-                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        context.sendBroadcast(intent);
                         Log.d(TAG, "HttpResponse: " + response.toString());
                     } catch (IOException e) {
                         //TODO: Handle Exception
@@ -64,7 +64,7 @@ public class HttpPostData extends Activity{
                     ex.printStackTrace();
                     final Intent intent = new Intent(ACTION_HTTP_POST_FAILED);
                     intent.putExtra(EXTRA_URL, surl);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    context.sendBroadcast(intent);
                 }
             }
         }).start();
