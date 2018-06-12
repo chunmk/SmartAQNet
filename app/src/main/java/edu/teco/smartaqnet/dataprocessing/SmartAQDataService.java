@@ -19,13 +19,17 @@ import edu.teco.smartaqnet.sensorthings.Observation;
 import edu.teco.smartaqnet.http.HttpPostData;
 import edu.teco.smartaqnet.sensorthings.TimestampUtils;
 
-public class
+public class SmartAQDataService extends Service {
 
-SmartAQDataService extends Service {
+    private final String seonsorsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors";
+    private final String observedPropertiesURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/ObservedProperties";
+    private final String thingsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Things";
+    private final String datastreamsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Datastreams";
+    private final String observationsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Observations";
+
 
     private final String TAG = SmartAQDataService.class.getName();
     private boolean isCreatedDatastream;
-    private String actualDevice;
     private final ObjectQueue<SmartAQDataObject> smartAQDataqueue =
             (new SmartAQDataQueue(getApplicationContext().getCacheDir().toString())).getSmartAQDataQueue();
 
@@ -44,43 +48,72 @@ SmartAQDataService extends Service {
     // Handles various events fired by the Service.
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
-    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver smartAQUpdateREceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-                if(action.equals(BLEReadService.ACTION_DATA_AVAILABLE)) {
-                    if (!isCreatedDatastream) {
-                        createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
-                        isCreatedDatastream = true;
-                    } else {
-                        // TODO: Fehelerbehandlung
-                    }
+            String url = "";
+                switch(action){
+                    case BLEReadService.ACTION_DATA_AVAILABLE:
+                        //TODO: Create BLEReadService.ACTION_SET_DEVICE_NAME and move createDatastream
+                        if (!isCreatedDatastream) {
+                            createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
+                            isCreatedDatastream = true;
+                        } else {
+                            // TODO: Fehelerbehandlung
+                        }
 
-                    //TODO: Daten verarbeiten
-                    byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
-                    SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
-                    setDataTimeStamp(smartAQData);
-                    try {
-                        smartAQDataqueue.add(smartAQData);
-                        smartAQData = smartAQDataqueue.peek();
-                    } catch (IOException e) {
-                        //TODO: Unhandled Exception
-                        e.printStackTrace();
-                    }
-                    Gson gson = new Gson();
-                    String observationAsJson = gson.toJson(new Observation(smartAQData));
-                    Log.d(TAG, "Received data in SmartAQDataservice");
+                        //TODO: Daten verarbeiten
+                        byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
+                        SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
+                        setDataTimeStamp(smartAQData);
+                        try {
+                            smartAQDataqueue.add(smartAQData);
+                            smartAQData = smartAQDataqueue.peek();
+                        } catch (IOException e) {
+                            //TODO: Unhandled Exception
+                            e.printStackTrace();
+                        }
+                        //TODO: Kapseln in sendObservation
+                        Gson gson = new Gson();
+                        String observationAsJson = gson.toJson(new Observation(smartAQData));
+                        HttpPostData.startJsonPost(observationsURL, observationAsJson, getApplicationContext());
+                        Log.d(TAG, "Received data in SmartAQDataservice");
+                        break;
+                    case HttpPostData.ACTION_HTTP_POST_SUCESS:
+                        url = intent.getStringExtra(HttpPostData.EXTRA_URL);
+                        if(url.equals(observationsURL)){
+                            try {
+                                smartAQDataqueue.remove();
+                            } catch (IOException e) {
+                                //TODO: Unhandled Exception
+                                e.printStackTrace();
+                            }
+                            //TODO: COntinue sending observations
+                        }
+                        Log.d(TAG, "onReceive: HTTP_SUCESS: " + url);
+                        //TODO: Continue sending data in larger chunks
+                        break;
+                    case HttpPostData.ACTION_HTTP_POST_FAILED:
+                        url = intent.getStringExtra(HttpPostData.EXTRA_URL);
+                        Log.d(TAG, "onReceive: HTTP_FAILED: " + url);
+                        //TODO; Reset sending to one object at a time and keep trying
+                        break;
+                    default:
+                        break;
                 }
         }
     };
 
     private void registerReceiver(){
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        registerReceiver(smartAQUpdateREceiver, smartAQUpdateIntentFilter());
     }
 
-    private static IntentFilter makeGattUpdateIntentFilter() {
+    private static IntentFilter smartAQUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(HttpPostData.ACTION_HTTP_POST_SUCESS);
+        intentFilter.addAction(HttpPostData.ACTION_HTTP_POST_FAILED);
         return intentFilter;
     }
     public void createDatastream(String device_name){
@@ -90,7 +123,10 @@ SmartAQDataService extends Service {
         String gsonobservedproperty = gson.toJson(datastream.getObservedProperty());
         String gsonthing = gson.toJson(datastream.getThing());
         String gsondatastream = gson.toJson(datastream);
-        HttpPostData.startJsonPost("http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors", gsonsensor);
+        HttpPostData.startJsonPost(seonsorsURL, gsonsensor, getApplicationContext());
+        HttpPostData.startJsonPost(observedPropertiesURL, gsonobservedproperty, getApplicationContext());
+        HttpPostData.startJsonPost(thingsURL, gsonthing, getApplicationContext());
+        HttpPostData.startJsonPost(datastreamsURL, gsondatastream, getApplicationContext());
         //System.out.println("Hier");
     }
 
