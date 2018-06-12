@@ -21,7 +21,7 @@ import edu.teco.smartaqnet.sensorthings.TimestampUtils;
 
 public class SmartAQDataService extends Service {
 
-    private final String seonsorsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors";
+    private final String sensorsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors";
     private final String observedPropertiesURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/ObservedProperties";
     private final String thingsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Things";
     private final String datastreamsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Datastreams";
@@ -30,12 +30,12 @@ public class SmartAQDataService extends Service {
 
     private final String TAG = SmartAQDataService.class.getName();
     private boolean isCreatedDatastream;
-    private final ObjectQueue<SmartAQDataObject> smartAQDataqueue =
-            (new SmartAQDataQueue(getApplicationContext().getCacheDir().toString())).getSmartAQDataQueue();
+    private ObjectQueue<SmartAQDataObject> smartAQDataqueue;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         //init
         isCreatedDatastream = false;
+        smartAQDataqueue = (new SmartAQDataQueue(getApplicationContext().getCacheDir().toString())).getSmartAQDataQueue();
         registerReceiver();
         return START_REDELIVER_INTENT;
     }
@@ -123,7 +123,7 @@ public class SmartAQDataService extends Service {
         String gsonobservedproperty = gson.toJson(datastream.getObservedProperty());
         String gsonthing = gson.toJson(datastream.getThing());
         String gsondatastream = gson.toJson(datastream);
-        HttpPostData.startJsonPost(seonsorsURL, gsonsensor, getApplicationContext());
+        HttpPostData.startJsonPost(sensorsURL, gsonsensor, getApplicationContext());
         HttpPostData.startJsonPost(observedPropertiesURL, gsonobservedproperty, getApplicationContext());
         HttpPostData.startJsonPost(thingsURL, gsonthing, getApplicationContext());
         HttpPostData.startJsonPost(datastreamsURL, gsondatastream, getApplicationContext());
