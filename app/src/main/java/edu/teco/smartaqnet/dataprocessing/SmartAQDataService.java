@@ -11,10 +11,13 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
+
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
 import edu.teco.smartaqnet.sensorthings.Datastream;
 import edu.teco.smartaqnet.sensorthings.Observation;
 import edu.teco.smartaqnet.http.HttpPostData;
+import edu.teco.smartaqnet.sensorthings.TimestampUtils;
 
 public class
 
@@ -22,8 +25,13 @@ SmartAQDataService extends Service {
 
     private final String TAG = SmartAQDataService.class.getName();
     private boolean isCreatedDatastream;
+    private String actualDevice;
+    private final ObjectQueue<SmartAQDataObject> smartAQDataqueue =
+            (new SmartAQDataQueue(getApplicationContext().getCacheDir().toString())).getSmartAQDataQueue();
 
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //init
+        isCreatedDatastream = false;
         registerReceiver();
         return START_REDELIVER_INTENT;
     }
@@ -34,9 +42,6 @@ SmartAQDataService extends Service {
         return null;
     }
     // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
@@ -46,13 +51,24 @@ SmartAQDataService extends Service {
                 if(action.equals(BLEReadService.ACTION_DATA_AVAILABLE)) {
                     if (!isCreatedDatastream) {
                         createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
+                        isCreatedDatastream = true;
+                    } else {
+                        // TODO: Fehelerbehandlung
                     }
 
                     //TODO: Daten verarbeiten
                     byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
                     SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
+                    setDataTimeStamp(smartAQData);
+                    try {
+                        smartAQDataqueue.add(smartAQData);
+                        smartAQData = smartAQDataqueue.peek();
+                    } catch (IOException e) {
+                        //TODO: Unhandled Exception
+                        e.printStackTrace();
+                    }
                     Gson gson = new Gson();
-                    String obsgson = gson.toJson(new Observation(smartAQData.getBleDustData()));
+                    String observationAsJson = gson.toJson(new Observation(smartAQData));
                     Log.d(TAG, "Received data in SmartAQDataservice");
                 }
         }
@@ -76,5 +92,9 @@ SmartAQDataService extends Service {
         String gsondatastream = gson.toJson(datastream);
         HttpPostData.startJsonPost("http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors", gsonsensor);
         //System.out.println("Hier");
+    }
+
+    public void setDataTimeStamp(SmartAQDataObject data){
+        data.setTimeStamp(TimestampUtils.getISO8601StringForCurrentDate());
     }
 }
