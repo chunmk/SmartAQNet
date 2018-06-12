@@ -1,11 +1,18 @@
 package edu.teco.smartaqnet.dataprocessing;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -63,24 +70,24 @@ public class SmartAQDataService extends Service {
                             // TODO: Fehelerbehandlung
                         }
 
-                        //TODO: Daten verarbeiten
                         byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
                         SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
                         setDataTimeStamp(smartAQData);
+                        //TODO: Kapseln in sendObservation
                         try {
                             smartAQDataqueue.add(smartAQData);
-                            smartAQData = smartAQDataqueue.peek();
+                            Gson gson = new Gson();
+                            String observationAsJson = gson.toJson(new Observation(smartAQData,getApplicationContext()));
+                            HttpPostData.startJsonPost(observationsURL, observationAsJson, getApplicationContext());
+                            //TODO: Http Success not Checked
+                        smartAQDataqueue.remove();
                         } catch (IOException e) {
                             //TODO: Unhandled Exception
                             e.printStackTrace();
                         }
-                        //TODO: Kapseln in sendObservation
-                        Gson gson = new Gson();
-                        String observationAsJson = gson.toJson(new Observation(smartAQData));
-                        HttpPostData.startJsonPost(observationsURL, observationAsJson, getApplicationContext());
-                        Log.d(TAG, "Received data in SmartAQDataservice");
                         break;
                     case HttpPostData.ACTION_HTTP_POST_SUCESS:
+                        //TODO: Not working HTTP as a service?
                         url = intent.getStringExtra(HttpPostData.EXTRA_URL);
                         if(url.equals(observationsURL)){
                             try {

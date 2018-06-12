@@ -1,13 +1,33 @@
 package edu.teco.smartaqnet.sensorthings;
 
-import edu.teco.smartaqnet.gps.GPSData;
+import android.content.Context;
+
+import java.util.ArrayList;
+
+import edu.teco.smartaqnet.gps.GPSTracker;
 
 public class Feature {
     String type = "Point";
-    String coordinates;
+    ArrayList<Double> coordinates;
 
-    public Feature(){
-        GPSData gps = new GPSData();
-        coordinates = "[-114.133, 51.08]"; //gps.getLocation().toString();
+    public Feature(Context context){
+        GPSTracker gps = new GPSTracker(context);
+        coordinates = new ArrayList<>();
+
+        // Check if GPS enabled
+        if(gps.canGetLocation()) {
+            coordinates.add(gps.getLatitude());
+            coordinates.add(gps.getLongitude());
+
+        } else {
+            // Can't get location.
+            // GPS or network is not enabled.
+            // Ask user to enable GPS/network in settings.
+            //TODO: Handle error
+            coordinates.add(0.0);
+            coordinates.add(0.0);
+            gps.showSettingsAlert();
+        }
+        gps.stopUsingGPS();
     }
 }
