@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -13,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
 public class HttpPostData extends Activity{
@@ -29,17 +29,18 @@ public class HttpPostData extends Activity{
             @Override
             public void run() {
                 try {
+                    byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
                     URL url = new URL(surl);
-                    URLConnection con;
-                    con = url.openConnection();
-                    HttpURLConnection http = (HttpURLConnection)con;
+                    HttpURLConnection http = (HttpURLConnection) url.openConnection();
                     http.setRequestMethod("POST");
+                    http.setDoInput(true);
                     http.setDoOutput(true);
-                    http.setFixedLengthStreamingMode(json.length());
+                    http.setFixedLengthStreamingMode(bytes.length);
                     http.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    http.setRequestProperty("Content-Encoding", "charset=UTF-8");
+                    http.setRequestProperty("Accept", "application/json");
                     http.connect();
                     try(OutputStream os = http.getOutputStream()) {
-                        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
                         os.write(bytes);
                         BufferedReader in = new BufferedReader(new InputStreamReader(http.getInputStream()));
                         String inputLine;
