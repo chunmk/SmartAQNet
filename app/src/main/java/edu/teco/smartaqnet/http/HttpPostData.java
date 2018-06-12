@@ -1,5 +1,10 @@
 package edu.teco.smartaqnet.http;
 
+import android.app.Activity;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -11,12 +16,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-public class HttpPostData {
+public class HttpPostData extends Activity{
 
     private static final String TAG = HttpPostData.class.getName();
+    public static final String ACTION_HTTP_POST_SUCESS = "ACTION_HTTP_POST_SUCESS";
+    public static final String ACTION_HTTP_POST_FAILED = "ACTION_HTTP_POST_FAILED";
+    public static final String EXTRA_URL = "EXTRA_URL";
 
     //Starts http connection in own thread, so that mainActivity can continue
-    public static void startJsonPost(final String surl, final String json){
+    public static void startJsonPost(final String surl, final String json, final Context context){
         new Thread(new Runnable(){
             @Override
             public void run() {
@@ -41,6 +49,9 @@ public class HttpPostData {
                             response.append(inputLine);
                         }
                         in.close();
+                        final Intent intent = new Intent(ACTION_HTTP_POST_SUCESS);
+                        intent.putExtra(EXTRA_URL, surl);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                         Log.d(TAG, "HttpResponse: " + response.toString());
                     } catch (IOException e) {
                         //TODO: Handle Exception
@@ -50,6 +61,9 @@ public class HttpPostData {
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
+                    final Intent intent = new Intent(ACTION_HTTP_POST_FAILED);
+                    intent.putExtra(EXTRA_URL, surl);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             }
         }).start();
