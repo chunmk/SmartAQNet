@@ -50,9 +50,9 @@ public class BTDetect extends Activity{
     private Intent gattServiceIntent;
 
     private String device_name = "";
-    // Stops scanning after 30 seconds.
+    // Stops scanning after 15 seconds.
     private Handler mHandler = new Handler();
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 15000;
 
 
     public BTDetect(Context context, BTStateButton bleConnectionButton) {
