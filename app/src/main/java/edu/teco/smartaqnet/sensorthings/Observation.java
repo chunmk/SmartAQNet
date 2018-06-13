@@ -16,11 +16,11 @@ public class Observation {
     private String id;
     @SerializedName("Datastream")
     //Todo: Passenden Datastream holen
-    private Datastream data = new Datastream("thing");
+    private Datastream datastream;
     @SerializedName("FeatureOfInterest")
     private FeatureOfInterest feature;
 
-    public Observation(SmartAQDataObject data, Context context){
+    public Observation(SmartAQDataObject data, Datastream datastream, Context context){
         String timeStamp = TimestampUtils.getISO8601StringForCurrentDate();
         String uid =  UUID.md5();
         this.phenomenonTime = data.getTimeStamp();
@@ -28,6 +28,7 @@ public class Observation {
         this.result = data.getBleDustData();
         this.id = uid;
         this.feature = new FeatureOfInterest(context);
+        this.datastream = datastream;
     }
 
 }

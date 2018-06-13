@@ -38,7 +38,7 @@ public class SmartAQDataService extends Service {
     private final String TAG = SmartAQDataService.class.getName();
     private boolean isCreatedDatastream;
     private ObjectQueue<SmartAQDataObject> smartAQDataqueue;
-
+    private Datastream datastream;
     public int onStartCommand(Intent intent, int flags, int startId) {
         //init
         isCreatedDatastream = false;
@@ -77,7 +77,7 @@ public class SmartAQDataService extends Service {
                         try {
                             smartAQDataqueue.add(smartAQData);
                             Gson gson = new Gson();
-                            String observationAsJson = gson.toJson(new Observation(smartAQData,getApplicationContext()));
+                            String observationAsJson = gson.toJson(new Observation(smartAQData,datastream, getApplicationContext()));
                             HttpPostData.startJsonPost(observationsURL, observationAsJson, getApplicationContext());
                             //TODO: Http Success not Checked
                         } catch (IOException e) {
@@ -123,7 +123,7 @@ public class SmartAQDataService extends Service {
         return intentFilter;
     }
     public void createDatastream(String device_name){
-        Datastream datastream = new Datastream(device_name);
+        datastream = new Datastream(device_name);
         Gson gson = new Gson();
         String gsonsensor = gson.toJson(datastream.getSensor());
         String gsonobservedproperty = gson.toJson(datastream.getObservedProperty());
