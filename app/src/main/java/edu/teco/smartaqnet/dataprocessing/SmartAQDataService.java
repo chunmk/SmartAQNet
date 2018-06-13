@@ -52,6 +52,8 @@ public class SmartAQDataService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+
     // Handles various events fired by the Service.
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.

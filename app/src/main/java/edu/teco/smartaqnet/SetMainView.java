@@ -3,6 +3,7 @@ package edu.teco.smartaqnet;
 import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ public class SetMainView {
         Button device1_button = mainActivity.findViewById(R.id.device1_button);
         Button device2_button = mainActivity.findViewById(R.id.device2_button);
         Button device3_button = mainActivity.findViewById(R.id.device3_button);
+        ImageButton imageButton = mainActivity.findViewById(R.id.imageButton);
         ProgressBar progressBar = mainActivity.findViewById(R.id.progressBar);
         TextView deviceValueText =  mainActivity.findViewById(R.id.deviceValueText);
         switch (view){
@@ -29,6 +31,8 @@ public class SetMainView {
                 device1_button.setEnabled(false);
                 device2_button.setEnabled(false);
                 device3_button.setEnabled(false);
+                imageButton.setEnabled(false);
+                imageButton.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
                 deviceValueText.setText("Press Button");
                 deviceValueText.setVisibility(View.VISIBLE);
@@ -43,6 +47,8 @@ public class SetMainView {
                 device3_button.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.VISIBLE);
                 deviceValueText.setVisibility(View.INVISIBLE);
+                imageButton.setEnabled(false);
+                imageButton.setVisibility(View.INVISIBLE);
                 //Text on controlBLEButton "Stop Scanning"
                 bleConnectionButton.setText("Stop scanning");
                 bleConnectionButton.setState(BTStateButton.States.STOP);
@@ -54,6 +60,8 @@ public class SetMainView {
                 device3_button.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
                 deviceValueText.setVisibility(View.INVISIBLE);
+                imageButton.setEnabled(false);
+                imageButton.setVisibility(View.INVISIBLE);
                 //Text on controlBLEButton "Scan for Devices"
                 bleConnectionButton.setText("Scan for Devices");
                 bleConnectionButton.setState(BTStateButton.States.SCAN);
@@ -64,6 +72,8 @@ public class SetMainView {
                 device2_button.setVisibility(View.INVISIBLE);
                 device3_button.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
+                imageButton.setEnabled(true);
+                imageButton.setVisibility(View.VISIBLE);
                 deviceValueText.setText("Getting Data");
                 deviceValueText.setVisibility(View.VISIBLE);
                 //Text on controlBLEButton "Disconnet from Device"
@@ -77,6 +87,8 @@ public class SetMainView {
                 device3_button.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
                 deviceValueText.setVisibility(View.VISIBLE);
+                imageButton.setEnabled(false);
+                imageButton.setVisibility(View.INVISIBLE);
                 deviceValueText.setText("No Devices found");
                 //Text on controlBLEButton "Disconnet from Device"
                 bleConnectionButton.setText("SCAN");

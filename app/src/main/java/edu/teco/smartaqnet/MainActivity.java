@@ -9,7 +9,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+
+import com.jjoe64.graphview.GraphView;
 
 import edu.teco.smartaqnet.bluetooth.BTDetect;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataService;
@@ -81,5 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    public void sendMessage(View view)
+    {
+        Intent intent = new Intent(this, GraphActivity.class);
+        startActivity(intent);
+    }
 }
