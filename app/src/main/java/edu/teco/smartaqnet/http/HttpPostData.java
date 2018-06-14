@@ -25,7 +25,7 @@ public class HttpPostData{
 
     //Starts http connection in own thread, so that mainActivity can continue
     public static void startJsonPost(final String surl, final String json, final Context context){
-        new Thread(new Runnable(){
+        Thread actualThread = new Thread(new Runnable(){
             @Override
             public void run() {
                 try {
@@ -44,7 +44,7 @@ public class HttpPostData{
                         os.write(bytes);
                         BufferedReader in = new BufferedReader(new InputStreamReader(http.getInputStream()));
                         String inputLine;
-                        StringBuffer response = new StringBuffer();
+                        StringBuilder response = new StringBuilder();
 
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
@@ -52,13 +52,14 @@ public class HttpPostData{
                         in.close();
                         final Intent intent = new Intent(ACTION_HTTP_POST_SUCESS);
                         intent.putExtra(EXTRA_URL, surl);
+                        //LocalBroadcastManager.getInstance(context).sendBroadcastSync(intent);
                         context.sendBroadcast(intent);
                         Log.d(TAG, "HttpResponse: " + response.toString());
+                        Log.d(TAG, "Actual Sensorthing: " + surl);
                     } catch (IOException e) {
                         //TODO: Handle Exception
                         e.printStackTrace();
                     }
-
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
@@ -67,6 +68,13 @@ public class HttpPostData{
                     context.sendBroadcast(intent);
                 }
             }
-        }).start();
+        });
+        actualThread.start();
+        try {
+            actualThread.join();
+        } catch(InterruptedException e){
+            //TODO: unhandled Exception
+            e.printStackTrace();
+        }
     }
 }
