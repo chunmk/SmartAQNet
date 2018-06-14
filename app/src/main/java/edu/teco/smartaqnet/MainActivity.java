@@ -33,13 +33,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        Window window = getWindow();
-//        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//        int col = Integer.parseInt("57A117", 16);
-//        window.setStatusBarColor(Integer.parseInt("57A117", 16) );
-
-
         //Starting data processing service
         Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
         startService(smartAQDataService);
@@ -63,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     //TODO: Besser prüfen ob Sensorthings vorhanden sind statt Fehler zu ignorieren
     //TODO: Alert Message für fehlendes GPS führt zum Absturz
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -84,9 +79,12 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    //Opens Graph view
     public void sendMessage(View view)
     {
         Intent intent = new Intent(this, GraphActivity.class);
         startActivity(intent);
     }
 }
+

@@ -28,6 +28,7 @@ import edu.teco.smartaqnet.sensorthings.TimestampUtils;
 
 public class SmartAQDataService extends Service {
 
+    //Rest Endpoints
     private final String sensorsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Sensors";
     private final String observedPropertiesURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/ObservedProperties";
     private final String thingsURL = "http://smartaqnet-dev.teco.edu:8080/FROST-Server/v1.0/Things";
@@ -39,6 +40,8 @@ public class SmartAQDataService extends Service {
     private boolean isCreatedDatastream;
     private ObjectQueue<SmartAQDataObject> smartAQDataqueue;
     private Datastream datastream;
+
+
     public int onStartCommand(Intent intent, int flags, int startId) {
         //init
         isCreatedDatastream = false;
@@ -97,7 +100,7 @@ public class SmartAQDataService extends Service {
                                 //TODO: Unhandled Exception
                                 e.printStackTrace();
                             }
-                            //TODO: COntinue sending observations
+                            //TODO: Continue sending observations
                         }
                         Log.d(TAG, "onReceive: HTTP_SUCCESS: " + url);
                         //TODO: Continue sending data in larger chunks
