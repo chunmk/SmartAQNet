@@ -1,29 +1,33 @@
 package edu.teco.smartaqnet;
 
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
-
-import com.jjoe64.graphview.GraphView;
 
 import edu.teco.smartaqnet.bluetooth.BTDetect;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataService;
-import edu.teco.smartaqnet.gps.GPSTracker;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
+/**
+ * SmartAQNet is a tool that connects to dust sensors via BLE, used for supervising air quality(TODO: Sensor type),
+ * therefore collecting measurement data and sending them to a Frost Server (https://github.com/FraunhoferIOSB/FROST-Server)
+ * using REST (https://de.wikipedia.org/wiki/Representational_State_Transfer).
+ * The API used to communicate with sensors is described in (https://github.com/FraunhoferIOSB/FROST-Server)
+ */
 public class MainActivity extends AppCompatActivity {
 
-    //Activate Button that controls the BLE Connection
+    /**
+     * Button to control the BLE connection via states described in BTStateButton class
+     */
     BTStateButton btStateButton;
+    /**
+     * The Ble handler.
+     */
     BTDetect bleHandler;
 
     @Override
@@ -80,7 +84,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //Opens Graph view
+    /**
+     * Send message.
+     *
+     * @param view the view
+     */
+//Opens Graph view
     public void sendMessage(View view)
     {
         Intent intent = new Intent(this, GraphActivity.class);
