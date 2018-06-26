@@ -7,14 +7,44 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+/**
+ * Utility class to adjust screen to available options depending on state of BLE connection
+ */
 public class SetMainView {
 
-    public enum views {startScan, scanning, devicesFound, connected, noDevicesFound}
-
-    /*
-    Choose which elements are visible in Main activity
-    controlBLEButton is always visible
+    /**
+     * The views represent the different states and thus the available options of the application
      */
+    public enum views {
+        /**
+         * Ready to scan for devices
+         */
+        startScan,
+        /**
+         * Scanning for devices
+         */
+        scanning,
+        /**
+         * Devices found are shown
+         */
+        devicesFound,
+        /**
+         * Shows received data from device as graph or numbers
+         */
+        connected,
+        /**
+         * Start rescan or stop looking for devices
+         */
+        noDevicesFound}
+
+    /**
+     * Set visible elments in view depending on BLE connection state
+     *
+     * @param view                Actaul screen
+     * @param mainActivity        Main activity
+     * @param bleConnectionButton Button to start next available option
+     */
+
     static public void setView(views view, Activity mainActivity, BTStateButton bleConnectionButton){
         Button device1_button = mainActivity.findViewById(R.id.device1_button);
         Button device2_button = mainActivity.findViewById(R.id.device2_button);
@@ -36,12 +66,11 @@ public class SetMainView {
                 progressBar.setVisibility(View.INVISIBLE);
                 deviceValueText.setText("Press Button");
                 deviceValueText.setVisibility(View.VISIBLE);
-                //Text on controlBLEButton "Scan for Devices"
                 bleConnectionButton.setText("Scan for Devices");
                 bleConnectionButton.setState(BTStateButton.States.SCAN);
                 break;
             case scanning:
-                //Everything invisible progress bar
+                //Everything invisible except progress bar
                 device1_button.setVisibility(View.INVISIBLE);
                 device2_button.setVisibility(View.INVISIBLE);
                 device3_button.setVisibility(View.INVISIBLE);
@@ -49,12 +78,11 @@ public class SetMainView {
                 deviceValueText.setVisibility(View.INVISIBLE);
                 imageButton.setEnabled(false);
                 imageButton.setVisibility(View.INVISIBLE);
-                //Text on controlBLEButton "Stop Scanning"
                 bleConnectionButton.setText("Stop scanning");
                 bleConnectionButton.setState(BTStateButton.States.STOP);
                 break;
             case devicesFound:
-                //Everything invisible except Buttons to choose device
+                //Everything invisible except Buttons to choose form detected devices
                 device1_button.setVisibility(View.VISIBLE);
                 device2_button.setVisibility(View.VISIBLE);
                 device3_button.setVisibility(View.VISIBLE);
@@ -62,12 +90,11 @@ public class SetMainView {
                 deviceValueText.setVisibility(View.INVISIBLE);
                 imageButton.setEnabled(false);
                 imageButton.setVisibility(View.INVISIBLE);
-                //Text on controlBLEButton "Scan for Devices"
                 bleConnectionButton.setText("Scan for Devices");
                 bleConnectionButton.setState(BTStateButton.States.SCAN);
                 break;
             case connected:
-                //Everything invisible except deviceValueText
+                //Everything invisible except deviceValueText with received data
                 device1_button.setVisibility(View.INVISIBLE);
                 device2_button.setVisibility(View.INVISIBLE);
                 device3_button.setVisibility(View.INVISIBLE);
@@ -76,12 +103,11 @@ public class SetMainView {
                 imageButton.setVisibility(View.VISIBLE);
                 deviceValueText.setText("Getting Data");
                 deviceValueText.setVisibility(View.VISIBLE);
-                //Text on controlBLEButton "Disconnet from Device"
                 bleConnectionButton.setText("Disconnect");
                 bleConnectionButton.setState(BTStateButton.States.DISCONNECT);
                 break;
             case noDevicesFound:
-                //Everything invisible except deviceValueText
+                //Everything invisible except deviceValueText showing "No devices found"
                 device1_button.setVisibility(View.INVISIBLE);
                 device2_button.setVisibility(View.INVISIBLE);
                 device3_button.setVisibility(View.INVISIBLE);
@@ -90,7 +116,6 @@ public class SetMainView {
                 imageButton.setEnabled(false);
                 imageButton.setVisibility(View.INVISIBLE);
                 deviceValueText.setText("No Devices found");
-                //Text on controlBLEButton "Disconnet from Device"
                 bleConnectionButton.setText("SCAN");
                 bleConnectionButton.setState(BTStateButton.States.SCAN);
                 break;

@@ -22,11 +22,11 @@ import static edu.teco.smartaqnet.SetMainView.*;
 public class MainActivity extends AppCompatActivity {
 
     /**
-     * Button to control the BLE connection via states described in BTStateButton class
+     * Button to control the view of the different ble connection states described in BTStateButton class
      */
     BTStateButton btStateButton;
     /**
-     * The Ble handler.
+     * Controls the process of building a Bluetootth LE Connection, from scanning, to connecting to device
      */
     BTDetect bleHandler;
 
@@ -37,14 +37,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Starting data processing service
+        //Starting service that collects and processes received data from device
         Intent smartAQDataService = new Intent(this, SmartAQDataService.class);
         startService(smartAQDataService);
-        /*Set first view of app and activate Button that controls BLE Connection*/
+        //Connect the button from View
         btStateButton = findViewById(R.id.btStateButton);
         setView(views.startScan, this, btStateButton);
-        //Activate Bluetooth
+        //Prepare Bluetooth connection
         bleHandler = new BTDetect(this, btStateButton);
+        //btStateButton controls BLE connection via bleHandler
         btStateButton.setClickListener(bleHandler);
     }
 
@@ -85,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Send message.
+     * Used to start graphical representation of data produced by device
+     * Started with imageButton in Main View
      *
      * @param view the view
      */
-//Opens Graph view
     public void sendMessage(View view)
     {
         Intent intent = new Intent(this, GraphActivity.class);

@@ -179,6 +179,7 @@ public class BTDetect extends Activity{
         gattServiceIntent.putExtra("device_name", device_name);
         mainActivity.startService(gattServiceIntent);
         mainActivity.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        //TODO: Move to case BLEReadService.ACTION_GATT_CONNECTED: -> test it
         SetMainView.setView(SetMainView.views.connected, mainActivity, bleConnectionButton);
     }
 

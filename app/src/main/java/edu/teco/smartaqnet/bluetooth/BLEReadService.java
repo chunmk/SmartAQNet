@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
+import edu.teco.smartaqnet.MainActivity;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
 import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.dataprocessing.ObjectQueue;
@@ -53,8 +54,6 @@ public class BLEReadService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
-    private ObjectQueue<String> smartAQDataQueue;
-    private String outPutDir;
     private String deviceName;
     //Just to delay operations
     // Stops scanning after 2 seconds.
@@ -87,15 +86,10 @@ public class BLEReadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        setOutPutDir(intent.getStringExtra("outPutDir"));
         initialize();
         connect(intent.getStringExtra("bleDeviceAdress"));
         deviceName = intent.getStringExtra("device_name");
         return START_REDELIVER_INTENT;
-    }
-
-    public void setOutPutDir(String outPutDir){
-        this.outPutDir = outPutDir;
     }
 
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -151,6 +145,10 @@ public class BLEReadService extends Service {
             try {
                 SmartAQDataObject data = new SmartAQDataObject();
                 data.setBleDustData(characteristic.getStringValue(0));
+                //TODO: Try to write data directly to Output with:
+                //Activity activity = getApplicationContext();
+                //SetMainview.setData();
+                //Should make receiving Data in BTDetect
                 byte[] bytes = ObjectByteConverterUtility.convertToByte(data);
                 broadcastUpdate(ACTION_DATA_AVAILABLE, bytes, deviceName);
             } catch (Exception e){
