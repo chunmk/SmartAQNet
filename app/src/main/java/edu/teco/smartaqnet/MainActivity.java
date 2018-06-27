@@ -14,9 +14,8 @@ import edu.teco.smartaqnet.dataprocessing.SmartAQDataService;
 import static edu.teco.smartaqnet.SetMainView.*;
 
 /**
- * SmartAQNet is a tool that connects to dust sensors via BLE, used for supervising air quality(TODO: Sensor type),
- * therefore collecting measurement data and sending them to a Frost Server (https://github.com/FraunhoferIOSB/FROST-Server)
- * using REST (https://de.wikipedia.org/wiki/Representational_State_Transfer).
+ * SmartAQNet is a tool that connects to dust sensors (nova pm sensor sds011) via Bluetooth Low Energy, used for supervising air quality.
+ * Measurement data are collected and sent them to a Frost Server using REST (https://de.wikipedia.org/wiki/Representational_State_Transfer).
  * The API used to communicate with sensors is described in (https://github.com/FraunhoferIOSB/FROST-Server)
  */
 public class MainActivity extends AppCompatActivity {

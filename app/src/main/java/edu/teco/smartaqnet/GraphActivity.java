@@ -14,14 +14,16 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 
-import java.util.Random;
-
 import edu.teco.smartaqnet.bluetooth.BLEReadService;
 import edu.teco.smartaqnet.dataprocessing.ObjectByteConverterUtility;
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
-import edu.teco.smartaqnet.http.HttpPostData;
 
 
+
+/**
+ * Graph and Chart Library from https://github.com/jjoe64/GraphView
+ *
+ */
 public class GraphActivity extends AppCompatActivity {
 
     private LineGraphSeries<DataPoint> series;
@@ -61,6 +63,7 @@ public class GraphActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // we add 100 new entries
+                //TODO: Can be changed to show continuously data point instead of 5000
                 for (int i = 0; i < 5000; i++) {
                     runOnUiThread(new Runnable() {
 
@@ -72,7 +75,7 @@ public class GraphActivity extends AppCompatActivity {
 
                     // sleep to slow down the add of entries
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         // manage error ...
                     }
@@ -81,11 +84,18 @@ public class GraphActivity extends AppCompatActivity {
         }).start();
     }
 
-    // add random data to graph
+
+    /**
+     *  Add data to graph
+     */
     private void addEntry() {
-        // here, we choose to display max 10 points on the viewport and we scroll to end
+        // here, we choose to display max 30 points on the viewport and we scroll to end
         series.appendData(new DataPoint(lastX++, graphData), true, 10);
     }
+
+    /**
+     * Initializes callback to receive data from BLE device
+     */
     private final BroadcastReceiver smartAQUpdateREceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -102,10 +112,19 @@ public class GraphActivity extends AppCompatActivity {
             }
         }
     };
+
+
+    /**
+     * Registers receiver to get data defined by smartAQUpdateIntentFilter() in actual context
+     *
+     */
     private void registerReceiver(){
-        registerReceiver(smartAQUpdateREceiver, smartAQUpdateIntentFilter());
+        getApplicationContext().registerReceiver(smartAQUpdateREceiver, smartAQUpdateIntentFilter());
     }
 
+    /**
+     * Defines which data will be received
+     */
     private static IntentFilter smartAQUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
