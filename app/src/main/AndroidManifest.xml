@@ -16,7 +16,7 @@
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
-    <!-- Todo: Needed to show Alert Dialogs from any class, but actually not working -->
+    <!-- Todo: Needed to show Alert Dialogs from any class, but actually not working // possible solution runOnUiThread() -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
