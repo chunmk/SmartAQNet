@@ -16,14 +16,35 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Utility class to send a JSon String via Http connection to a server
+ * indicated by a url
+ */
 public class HttpPostData{
 
     private static final String TAG = HttpPostData.class.getName();
+
     public static final String ACTION_HTTP_POST_SUCESS = "ACTION_HTTP_POST_SUCESS";
     public static final String ACTION_HTTP_POST_FAILED = "ACTION_HTTP_POST_FAILED";
+    /**
+     * Identifier for broadcasting HTTP send results
+     */
     public static final String EXTRA_URL = "EXTRA_URL";
 
-    //Starts http connection in own thread, so that mainActivity can continue
+    /**
+     * Private constructor: class cannot be instantiated
+     */
+    private HttpPostData(){
+
+    }
+    /**
+     * Starts http connection for sending JSon Data in own thread,
+     * so that calling Activity may continue
+     *
+     * @param surl    adress of receiving server
+     * @param json    to be sent
+     * @param context calling activity
+     */
     public static void startJsonPost(final String surl, final String json, final Context context){
         Thread actualThread = new Thread(new Runnable(){
             @Override

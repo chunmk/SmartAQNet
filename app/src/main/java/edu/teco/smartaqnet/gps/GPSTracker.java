@@ -1,5 +1,6 @@
 package edu.teco.smartaqnet.gps;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,18 +14,24 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+/**
+ * Class to ask for actual gps location taken from:
+ * https://github.com/sahityakumarsuman/gps-tracking-android-sample-app/blob/master/app/src/main/java/com/example/duke/gpsloc/GPSTracker.java
+ */
 public class GPSTracker extends Service implements LocationListener {
 
     private final Context mContext;
 
-    // Flag for GPS status
+    // Flag indicating GPS status
     boolean isGPSEnabled = false;
 
-    // Flag for network status
+    // Flag indicating network status
     boolean isNetworkEnabled = false;
 
-    // Flag for GPS status
+
+    // Flag indicating GPS status
     boolean canGetLocation = false;
+
 
     Location location; // Location
     double latitude; // Latitude
@@ -34,16 +41,26 @@ public class GPSTracker extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 30 * 1; // 30 seconds
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
+    /**
+     * Instantiates a new Gps tracker.
+     *
+     * @param context the context
+     */
     public GPSTracker(Context context) {
         this.mContext = context;
         getLocation();
     }
 
+    /**
+     * Gets location.
+     *
+     * @return the location
+     */
     public Location getLocation() {
         try {
             locationManager = (LocationManager) mContext
@@ -107,7 +124,7 @@ public class GPSTracker extends Service implements LocationListener {
     /**
      * Stop using GPS listener
      * Calling this function will stop using GPS in your app.
-     * */
+     */
     public void stopUsingGPS(){
         if(locationManager != null){
             locationManager.removeUpdates(GPSTracker.this);
@@ -117,7 +134,9 @@ public class GPSTracker extends Service implements LocationListener {
 
     /**
      * Function to get latitude
-     * */
+     *
+     * @return the double
+     */
     public double getLatitude(){
         if(location != null){
             latitude = location.getLatitude();
@@ -130,7 +149,9 @@ public class GPSTracker extends Service implements LocationListener {
 
     /**
      * Function to get longitude
-     * */
+     *
+     * @return the double
+     */
     public double getLongitude(){
         if(location != null){
             longitude = location.getLongitude();
@@ -142,8 +163,9 @@ public class GPSTracker extends Service implements LocationListener {
 
     /**
      * Function to check GPS/Wi-Fi enabled
-     * @return boolean
-     * */
+     *
+     * @return boolean boolean
+     */
     public boolean canGetLocation() {
         return this.canGetLocation;
     }
@@ -151,10 +173,11 @@ public class GPSTracker extends Service implements LocationListener {
     /**
      * Function to show settings alert dialog.
      * On pressing the Settings button it will launch Settings Options.
-     * */
-    //TODO: Alert Dialog funktioniert nicht -> Absturz
+     */
+//TODO: Alert Dialog funktioniert nicht -> Absturz
     public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+        //TODO: test with this call
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder((Activity) getApplicationContext());
 
         // Setting Dialog Title
         alertDialog.setTitle("GPS is settings");

@@ -7,8 +7,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+
+/*
+ * Creates an object to hold measured data with actual timestamp from sensor
+ * Used to store measurements in FIFO queue, so that data could be sent
+ * to server independent from measurement point in time
+ */
 public class SmartAQDataObject implements Serializable{
     private String bleDustData;
+    //UUID needed for serialization
     private static final long serialVersionUID = 6526472154622876147L;
     private String timeStamp;
 
@@ -23,6 +30,8 @@ public class SmartAQDataObject implements Serializable{
         return timeStamp;
     }
 
+
+    //Needed methods to make SmartAQDataObjects serializable
     @NonNull
     private void writeObject( ObjectOutputStream oos ) throws IOException
     {

@@ -7,6 +7,12 @@ import com.google.gson.annotations.SerializedName;
 
 import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
 
+/**
+ * Describes an Observation item as excpected by Frostserver and described
+ * at http://developers.sensorup.com/docs/
+ * The annotation @SerializedName is needed to adjust attribute names
+ * to identifier as defined in SensorThings API
+ */
 public class Observation {
 
     private String phenomenonTime;
@@ -20,8 +26,14 @@ public class Observation {
     @SerializedName("FeatureOfInterest")
     private FeatureOfInterest feature;
 
+    /**
+     * Instantiates a new Observation.
+     *
+     * @param data       actually measured data from sensor
+     * @param datastream Datastream that the observation belongs to
+     * @param context    context needed for GPS call in Feature //TODO: GPS should not be called by Feature class
+     */
     public Observation(SmartAQDataObject data, Datastream datastream, Context context){
-        String timeStamp = TimestampUtils.getISO8601StringForCurrentDate();
         String uid =  UUID.md5();
         this.phenomenonTime = data.getTimeStamp();
         this.resultTime = data.getTimeStamp();

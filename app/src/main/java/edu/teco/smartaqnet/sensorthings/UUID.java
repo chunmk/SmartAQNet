@@ -5,7 +5,18 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class UUID {
+
+/**
+ * Just a placeholder to create UUID needed by sensorthing items
+ * should eventually be adjusted later on
+ */
+class UUID {
+
+    /**
+     * Private constructor: class cannot be instantiated
+     */
+    private UUID(){}
+
     static public String md5() {
         try {
             Date time = Calendar.getInstance().getTime();

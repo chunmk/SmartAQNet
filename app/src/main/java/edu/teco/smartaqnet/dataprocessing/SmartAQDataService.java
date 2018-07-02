@@ -26,6 +26,11 @@ import edu.teco.smartaqnet.sensorthings.Observation;
 import edu.teco.smartaqnet.http.HttpPostData;
 import edu.teco.smartaqnet.sensorthings.TimestampUtils;
 
+/**
+ * Used to receive and process actual data from sensor via BLE
+ * Implemented as service, so that data maybe processed as background task
+ * Uses a FIFO queue that stores its data in a file to make collected data persistent
+ */
 public class SmartAQDataService extends Service {
 
     //Rest Endpoints
@@ -66,20 +71,24 @@ public class SmartAQDataService extends Service {
             final String action = intent.getAction();
             String url = "";
                 switch(action){
+                    //Data received, try to process
                     case BLEReadService.ACTION_DATA_AVAILABLE:
                         //TODO: Create BLEReadService.ACTION_SET_DEVICE_NAME and move createDatastream
+                        //Checks if Datastream for actual data has already been created
                         if (!isCreatedDatastream) {
-                            createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
-                            isCreatedDatastream = true;
+                            isCreatedDatastream = createDatastream(intent.getStringExtra(BLEReadService.EXTRA_DEVICE_NAME));
                         } else {
                             // TODO: Fehelerbehandlung
                         }
-
+                        //Receive SmartAQDataObject as byte array
                         byte[] bytes = intent.getByteArrayExtra(BLEReadService.EXTRA_BYTES);
+                        //Convert byte array to SmartAQDataObject
                         SmartAQDataObject smartAQData = (SmartAQDataObject) ObjectByteConverterUtility.convertFromByte(bytes);
                         setDataTimeStamp(smartAQData);
                         //TODO: Kapseln in sendObservation
+                        //Try to send received data as JSon string to server
                         try {
+                            //add data i  FIFO queue
                             smartAQDataqueue.add(smartAQData);
                             Gson gson = new Gson();
                             String observationAsJson = gson.toJson(new Observation(smartAQData,datastream, getApplicationContext()));
@@ -90,11 +99,14 @@ public class SmartAQDataService extends Service {
                             e.printStackTrace();
                         }
                         break;
+                    //Check if Post was successfull
                     case HttpPostData.ACTION_HTTP_POST_SUCESS:
                         //TODO: Not working HTTP as a service?
                         url = intent.getStringExtra(HttpPostData.EXTRA_URL);
                         if(url.equals(observationsURL)){
                             try {
+                                //TODO: could parameter be used to check if threaded http post has sent more then one data(must be synchronized?)?
+                                //Post successful -> remove processed data from queue
                                 smartAQDataqueue.remove();
                             } catch (IOException e) {
                                 //TODO: Unhandled Exception
@@ -105,6 +117,7 @@ public class SmartAQDataService extends Service {
                         Log.d(TAG, "onReceive: HTTP_SUCCESS: " + url);
                         //TODO: Continue sending data in larger chunks
                         break;
+                    //error handling for failed POST
                     case HttpPostData.ACTION_HTTP_POST_FAILED:
                         url = intent.getStringExtra(HttpPostData.EXTRA_URL);
                         Log.d(TAG, "onReceive: HTTP_FAILED: " + url);
@@ -116,10 +129,18 @@ public class SmartAQDataService extends Service {
         }
     };
 
+
+    /**
+     * Registers receiver to get data defined by smartAQUpdateIntentFilter() in actual context
+     *
+     */
     private void registerReceiver(){
         registerReceiver(smartAQUpdateREceiver, smartAQUpdateIntentFilter());
     }
 
+    /**
+     * Defines which data will be received
+     */
     private static IntentFilter smartAQUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BLEReadService.ACTION_DATA_AVAILABLE);
@@ -127,7 +148,13 @@ public class SmartAQDataService extends Service {
         intentFilter.addAction(HttpPostData.ACTION_HTTP_POST_FAILED);
         return intentFilter;
     }
-    public void createDatastream(String device_name){
+
+    /**
+     * Tries to create a Datastream vie Http Post
+     *
+     * @param device_name the device name
+     */
+    public boolean createDatastream(String device_name){
         datastream = new Datastream(device_name);
         Gson gson = new Gson();
         String gsonsensor = gson.toJson(datastream.getSensor());
@@ -138,9 +165,15 @@ public class SmartAQDataService extends Service {
         HttpPostData.startJsonPost(observedPropertiesURL, gsonobservedproperty, getApplicationContext());
         HttpPostData.startJsonPost(thingsURL, gsonthing, getApplicationContext());
         HttpPostData.startJsonPost(datastreamsURL, gsondatastream, getApplicationContext());
-        //System.out.println("Hier");
+        //TODO: success of Post must be checked
+        return true;
     }
 
+    /**
+     * Set data time stamp.
+     *
+     * @param data the data
+     */
     public void setDataTimeStamp(SmartAQDataObject data){
         data.setTimeStamp(TimestampUtils.getISO8601StringForCurrentDate());
     }

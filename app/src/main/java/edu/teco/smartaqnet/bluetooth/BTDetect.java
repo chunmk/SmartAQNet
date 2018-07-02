@@ -33,6 +33,13 @@ import edu.teco.smartaqnet.dataprocessing.SmartAQDataObject;
 
 import static edu.teco.smartaqnet.SetMainView.*;
 
+
+/**
+ * Used to search for BLE devices and connect to them
+ * Check: https://developer.android.com/guide/topics/connectivity/bluetooth-le
+ * for further information
+ * TODO: Check interaction between BTDetect and BLEReadservice might be better seperated
+ */
 public class BTDetect extends Activity{
 
     private final static String TAG = BTDetect.class.getSimpleName();
